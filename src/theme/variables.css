@@ -106,14 +106,63 @@
 }
 
 /* ---- Global base styles ---- */
-* {
+*, *::before, *::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   font-family: var(--font-body);
   background-color: var(--color-background);
   color: var(--color-on-surface);
+}
+
+/* Smooth scroll everywhere */
+ion-content {
+  --overflow: auto;
+  scroll-behavior: smooth;
+}
+
+/* IonToast polish */
+ion-toast {
+  --border-radius: var(--radius-lg);
+  --box-shadow: 0 8px 32px rgba(45, 19, 32, 0.18);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* IonRefresher */
+ion-refresher {
+  --color: var(--color-primary);
+}
+
+/* IonSkeletonText default style */
+ion-skeleton-text {
+  --background: var(--color-surface-container-low);
+  --background-rgb: 255, 240, 244;
+}
+
+/* IonModal polish */
+ion-modal {
+  --border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+ion-modal::part(backdrop) {
+  background: rgba(45, 19, 32, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Segment global */
+ion-segment {
+  --background: transparent;
+  border: 1.5px solid var(--color-outline-variant);
+  border-radius: var(--radius-full);
+  overflow: hidden;
 }
 
 h1, h2, h3, h4 {

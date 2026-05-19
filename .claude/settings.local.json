@@ -16,7 +16,8 @@
       "WebFetch(domain:ph.openrice.com)",
       "WebFetch(domain:www.remyeats.com)",
       "WebFetch(domain:wanderlog.com)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "mcp__supabase__search_docs"
     ]
   },
   "enableAllProjectMcpServers": true,

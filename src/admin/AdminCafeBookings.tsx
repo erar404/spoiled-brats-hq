@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  IonBadge, IonButton, IonIcon, IonModal,
-  IonSegment, IonSegmentButton, IonLabel, IonSpinner,
+  IonBadge, IonButton, IonIcon, IonItem, IonItemOption,
+  IonItemOptions, IonItemSliding, IonList, IonModal,
+  IonRippleEffect, IonSegment, IonSegmentButton, IonLabel, IonSpinner,
 } from '@ionic/react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -13,6 +14,8 @@ import {
   homeOutline, peopleOutline, personOutline, closeOutline,
 } from 'ionicons/icons'
 import { supabase } from '../lib/supabase'
+import { useToast } from '../hooks/useToast'
+import { BookingListSkeleton } from '../components/Skeletons'
 import type { CafeScheduleRow, BookingStatus } from '../types/database'
 import './AdminBookings.css'
 
@@ -47,6 +50,7 @@ function displayName(b: BookingWithUser) {
 }
 
 export default function AdminCafeBookings() {
+  const { toast, ToastEl } = useToast()
   const [bookings, setBookings]       = useState<BookingWithUser[]>([])
   const [calEvents, setCalEvents]     = useState<EventInput[]>([])
   const [loading, setLoading]         = useState(true)
@@ -80,8 +84,10 @@ export default function AdminCafeBookings() {
 
   async function updateStatus(id: number, status: BookingStatus) {
     setUpdating(true)
-    await supabase.from('cafe_schedule').update({ status }).eq('id', id)
+    const { error } = await supabase.from('cafe_schedule').update({ status }).eq('id', id)
     setUpdating(false)
+    if (error) { toast(error.message, 'danger'); return }
+    toast(`Booking ${status}.`, 'success')
     setSelected(null)
     load()
   }
@@ -119,21 +125,31 @@ export default function AdminCafeBookings() {
       </IonSegment>
 
       {/* Booking list */}
+      {ToastEl}
       {loading ? (
-        <div style={{ display:'flex', justifyContent:'center', padding:'40px 0' }}>
-          <IonSpinner name="crescent" color="primary" />
-        </div>
+        <BookingListSkeleton count={4} />
       ) : list.length === 0 ? (
         <div className="admin-empty">
           <IonIcon icon={cafeOutline} />
           <p>No {filter === 'all' ? '' : filter} cafe bookings yet.</p>
         </div>
       ) : (
-        <div className="admin-bk-list">
+        <IonList lines="none" style={{ background: 'transparent', padding: 0 }}>
           {list.map(b => (
-            <div key={b.id} className={`admin-bk-card status-${b.status}`}
-              onClick={() => setSelected(b)}>
-              <div className="admin-bk-icon"><IonIcon icon={cafeOutline} /></div>
+            <IonItemSliding key={b.id}>
+              <IonItemOptions side="start">
+                <IonItemOption color="success" expandable
+                  onClick={() => updateStatus(b.id, 'approved')}>
+                  <IonIcon slot="icon-only" icon={checkmarkCircleOutline} />
+                </IonItemOption>
+              </IonItemOptions>
+
+              <IonItem lines="none" detail={false}
+                onClick={() => setSelected(b)}
+                style={{ '--background':'transparent','--padding-start':'0','--padding-end':'0','--inner-padding-end':'0','--min-height':'0','marginBottom':'8px' }}>
+                <div className={`admin-bk-card status-${b.status}`} style={{ width:'100%', marginBottom:0, position:'relative', overflow:'hidden' }}>
+                  <IonRippleEffect />
+                  <div className="admin-bk-icon"><IonIcon icon={cafeOutline} /></div>
               <div className="admin-bk-body">
                 <p className="admin-bk-name">{b.event_name}</p>
                 <p className="admin-bk-meta">
@@ -152,9 +168,22 @@ export default function AdminCafeBookings() {
                 </IonBadge>
                 <IonIcon icon={chevronForwardOutline} className="admin-bk-chevron" />
               </div>
-            </div>
+                </div>
+              </IonItem>
+
+              <IonItemOptions side="end">
+                <IonItemOption color="danger" expandable
+                  onClick={() => updateStatus(b.id, 'rejected')}>
+                  <IonIcon slot="icon-only" icon={closeCircleOutline} />
+                </IonItemOption>
+                <IonItemOption color="medium" expandable
+                  onClick={() => updateStatus(b.id, 'cancelled')}>
+                  <IonIcon slot="icon-only" icon={banOutline} />
+                </IonItemOption>
+              </IonItemOptions>
+            </IonItemSliding>
           ))}
-        </div>
+        </IonList>
       )}
 
       {/* Calendar */}

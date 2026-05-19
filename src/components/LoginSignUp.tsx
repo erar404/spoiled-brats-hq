@@ -4,6 +4,7 @@ import {
   IonSegmentButton, IonLabel, IonSpinner,
 } from '@ionic/react'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../hooks/useToast'
 import './LoginSignUp.css'
 
 type AuthMode = 'login' | 'signup'
@@ -16,12 +17,11 @@ export default function LoginSignUp() {
     verifyPhoneOtp, signUpWithEmail,
   } = useAuth()
 
+  const { toast, ToastEl } = useToast()
   const [mode, setMode] = useState<AuthMode>('login')
   const [method, setMethod] = useState<LoginMethod>('email')
   const [phoneStep, setPhoneStep] = useState<PhoneStep>('input')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   // Login fields
   const [email, setEmail] = useState('')
@@ -37,7 +37,7 @@ export default function LoginSignUp() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
 
-  function reset() { setError(''); setSuccess('') }
+  function reset() { /* toast auto-dismisses */ }
 
   async function wrap(fn: () => Promise<void>) {
     setLoading(true); reset()
@@ -45,49 +45,49 @@ export default function LoginSignUp() {
   }
 
   async function onEmailLogin() {
-    if (!email || !password) return setError('Please fill in all fields.')
+    if (!email || !password) return toast('Please fill in all fields.', 'warning')
     await wrap(async () => {
       const err = await signInWithEmail(email, password)
-      if (err) setError(err)
+      if (err) toast(err, 'danger')
     })
   }
 
   async function onGoogleLogin() {
     await wrap(async () => {
       const err = await signInWithGoogle()
-      if (err) setError(err)
+      if (err) toast(err, 'danger')
     })
   }
 
   async function onSendOtp() {
-    if (!phone) return setError('Please enter your mobile number.')
+    if (!phone) return toast('Please enter your mobile number.', 'warning')
     await wrap(async () => {
       const err = await signInWithPhone(phone)
-      if (err) setError(err)
-      else { setPhoneStep('verify'); setSuccess('OTP sent! Check your messages.') }
+      if (err) toast(err, 'danger')
+      else { setPhoneStep('verify'); toast('OTP sent! Check your messages.', 'success') }
     })
   }
 
   async function onVerifyOtp() {
-    if (!otp) return setError('Please enter the OTP.')
+    if (!otp) return toast('Please enter the OTP.', 'warning')
     await wrap(async () => {
       const err = await verifyPhoneOtp(phone, otp)
-      if (err) setError(err)
+      if (err) toast(err, 'danger')
     })
   }
 
   async function onSignUp() {
     if (!suEmail || !suPassword || !username || !firstName || !lastName)
-      return setError('Please fill in all fields.')
-    if (suPassword !== suConfirm) return setError('Passwords do not match.')
-    if (suPassword.length < 6) return setError('Password must be at least 6 characters.')
+      return toast('Please fill in all fields.', 'warning')
+    if (suPassword !== suConfirm) return toast('Passwords do not match.', 'warning')
+    if (suPassword.length < 6) return toast('Password must be at least 6 characters.', 'warning')
     await wrap(async () => {
       const { error: err, needsVerification } = await signUpWithEmail(
         suEmail, suPassword, username, firstName, lastName
       )
-      if (err) setError(err)
+      if (err) toast(err, 'danger')
       else if (needsVerification)
-        setSuccess('Account created! Check your email to verify your account.')
+        toast('Account created! Check your email to verify your account.', 'success')
     })
   }
 
@@ -116,9 +116,7 @@ export default function LoginSignUp() {
           <IonSegmentButton value="signup"><IonLabel>Sign Up</IonLabel></IonSegmentButton>
         </IonSegment>
 
-        {/* Feedback messages */}
-        {error && <div className="auth-message auth-message--error"><p>{error}</p></div>}
-        {success && <div className="auth-message auth-message--success"><p>{success}</p></div>}
+        {ToastEl}
 
         {/* ---- LOGIN ---- */}
         {mode === 'login' && (

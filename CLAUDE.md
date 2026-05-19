@@ -114,23 +114,34 @@ Full-stack booking website for **Spoiled Brats Cafe** and **Kajon Music Studio**
 - [x] node_modules clean reinstall — esbuild extraction error resolved
 - [x] TypeScript check: 0 errors
 
-### Phase 6 — Admin Panel: Booking Management
-**Start prompt:** `Phase 6 — Admin booking management (cafe + studio)`
-- Admin route guard (role === 'admin')
-- Cafe Booking Requests: list sorted by status, click → modal with Accept/Decline/Cancel
-- Studio Booking Requests: same pattern
-- FullCalendar views for both
+### Phase 6 — Admin Panel: Booking Management ✅ COMPLETE
+- [x] AdminCafeBookings (src/admin/AdminCafeBookings.tsx): stats bar (Pending/Approved/Rejected/Cancelled counts, clickable to filter), status filter segment (All|Pending|Approved|Rejected|Cancelled), booking list sorted by status with left-color-border cards, dayGridMonth FullCalendar with event-click, detail IonModal (bottom sheet, breakpoints) with all fields + Accept/Decline/Cancel action buttons
+- [x] AdminStudioBookings (src/admin/AdminStudioBookings.tsx): same pattern but studio-specific (band name, time range, type chip), timeGridWeek FullCalendar with Week/Month toggle, same detail modal pattern
+- [x] Both components: embedded user join (users!user_id) to show requester's full name in list and modal
+- [x] Action buttons are context-aware: only show relevant transitions (e.g. no Accept if already approved)
+- [x] AdminBookings.css: stats cards, filter segment, booking list cards, modal, calendar overrides, legend
+- [x] AdminPage.tsx: wired both components into their tabs; Users/Menu/Settings remain as Phase 7 placeholders
+- [x] TypeScript check: 0 errors
 
-### Phase 7 — Admin Panel: Users, Menu, Settings
-**Start prompt:** `Phase 7 — Admin user list, menu list, and schedule settings`
-- User list: edit name/role/status
-- Menu list: CRUD + image upload to menu-images bucket
-- Schedule Settings: edit store hours from system_settings
+### Phase 7 — Admin Panel: Users, Menu, Settings ✅ COMPLETE
+- [x] AdminUserList (src/admin/AdminUserList.tsx): stat cards (total users / admins), search by name/username/email, user cards with avatar initials (orange=user, sage=admin), role badge, edit modal with first/last name + username + role IonSelect → UPDATE users
+- [x] AdminMenuList (src/admin/AdminMenuList.tsx): item count header, Add Item button, 2-col grid with thumbnail/name/price/category/availability; modal for add/edit: tap-to-upload image (Supabase storage → menu-images bucket, public URL saved), name, description, price, category IonSelect, availability IonToggle, delete button → DELETE; INSERT or UPDATE cafe_menu
+- [x] AdminScheduleSettings (src/admin/AdminScheduleSettings.tsx): Cafe/Studio venue segment, hours table (Mon–Sun rows with open/close IonInput type="time"), Save button with "Saved!" confirmation → UPSERT system_settings
+- [x] AdminPhase7.css: user cards, menu grid + cards, image upload UI, hours table, venue segment
+- [x] AdminPage.tsx: all three tabs wired in, no more placeholders
+- [x] TypeScript check: 0 errors
 
-### Phase 8 — Polish & End-to-End Testing
-**Start prompt:** `Phase 8 — Polish and end-to-end testing`
-- Acoustic Brew CSS variable audit
-- Responsive layout (Ionic adaptive)
-- IonSkeletonText on all data loads
-- IonToast for success/error states
-- Full flow test: auth → booking → admin action
+### Phase 8 — Polish & End-to-End Testing ✅ COMPLETE
+- [x] src/hooks/useToast.tsx — reusable hook returning {toast, ToastEl}; used across all 8 components
+- [x] src/components/Skeletons.tsx — BookingCardSkeleton, BookingListSkeleton, UserListSkeleton, MenuGridSkeleton, MyBookingsSkeleton
+- [x] App.tsx — splash screen while auth loads (cafe logo + spinner on cream background)
+- [x] LoginSignUp.tsx — all setError/setSuccess replaced with toast(); inline message divs removed
+- [x] CafeBooking.tsx — toast for all feedback; MyBookingsSkeleton for loading; IonRefresher pull-to-refresh
+- [x] StudioBooking.tsx — same pattern as CafeBooking
+- [x] AdminCafeBookings.tsx — BookingListSkeleton + toast on status updates
+- [x] AdminStudioBookings.tsx — same
+- [x] AdminUserList.tsx — UserListSkeleton + toast on save
+- [x] AdminMenuList.tsx — MenuGridSkeleton + toast on save/delete
+- [x] AdminScheduleSettings.tsx — toast on save; removed saved state
+- [x] variables.css — font-smoothing (-webkit-font-smoothing: antialiased), smooth scroll, IonToast/IonModal/IonSegment/IonRefresher/IonSkeletonText global polish
+- [x] TypeScript check: 0 errors across all 17 .tsx files

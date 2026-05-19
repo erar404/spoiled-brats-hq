@@ -6,6 +6,9 @@ import { useState } from 'react'
 import { AdminRoute } from '../components/ProtectedRoute'
 import AdminCafeBookings from '../admin/AdminCafeBookings'
 import AdminStudioBookings from '../admin/AdminStudioBookings'
+import AdminUserList from '../admin/AdminUserList'
+import AdminMenuList from '../admin/AdminMenuList'
+import AdminScheduleSettings from '../admin/AdminScheduleSettings'
 
 type AdminTab = 'cafe-bookings' | 'studio-bookings' | 'users' | 'menu' | 'settings'
 
@@ -47,21 +50,9 @@ function AdminDashboard() {
         <div style={{ padding: '20px 16px 0' }}>
           {tab === 'cafe-bookings'   && <AdminCafeBookings />}
           {tab === 'studio-bookings' && <AdminStudioBookings />}
-          {tab === 'users' && (
-            <p style={{ color:'var(--color-on-surface-variant)', fontStyle:'italic', textAlign:'center', marginTop:40 }}>
-              User management — Phase 7
-            </p>
-          )}
-          {tab === 'menu' && (
-            <p style={{ color:'var(--color-on-surface-variant)', fontStyle:'italic', textAlign:'center', marginTop:40 }}>
-              Menu management — Phase 7
-            </p>
-          )}
-          {tab === 'settings' && (
-            <p style={{ color:'var(--color-on-surface-variant)', fontStyle:'italic', textAlign:'center', marginTop:40 }}>
-              Schedule settings — Phase 7
-            </p>
-          )}
+          {tab === 'users'    && <AdminUserList />}
+          {tab === 'menu'     && <AdminMenuList />}
+          {tab === 'settings' && <AdminScheduleSettings />}
         </div>
       </IonContent>
     </IonPage>

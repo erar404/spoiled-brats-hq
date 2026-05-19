@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import {
   IonContent, IonHeader, IonIcon, IonPage,
   IonSegment, IonSegmentButton, IonLabel, IonButton, IonToolbar, IonTitle,
+  IonRippleEffect,
+  createAnimation, useIonViewDidEnter, useIonViewWillEnter,
 } from '@ionic/react'
 import {
   locationOutline, callOutline, mailOutline, timeOutline,
@@ -52,6 +54,29 @@ export default function CafePage() {
     if (params.get('tab') === 'bookings') setTab('book')
   }, [location.search])
 
+  // Reset animated elements before the tab slide-in
+  useIonViewWillEnter(() => {
+    document.querySelectorAll('.cafe-animate').forEach(el => {
+      ;(el as HTMLElement).style.opacity = '0'
+      ;(el as HTMLElement).style.transform = 'translateY(22px)'
+    })
+  })
+
+  // Drive staggered entry with Ionic's createAnimation when tab is fully visible
+  useIonViewDidEnter(() => {
+    const targets = Array.from(document.querySelectorAll('.cafe-animate'))
+    targets.forEach((el, i) => {
+      createAnimation()
+        .addElement(el as HTMLElement)
+        .duration(540)
+        .delay(i * 70)
+        .easing('cubic-bezier(0.22, 1, 0.36, 1)')
+        .fromTo('opacity', '0', '1')
+        .fromTo('transform', 'translateY(22px)', 'translateY(0px)')
+        .play()
+    })
+  })
+
   return (
     <IonPage>
       <IonHeader>
@@ -79,9 +104,10 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
     <div className="landing-page">
 
       {/* Hero */}
-      <section className="hero-section" style={{ backgroundImage: "url('/cafe2.jpg')" }}>
+      <section className="hero-section">
+        <div className="hero-bg" style={{ backgroundImage: "url('/cafe2.jpg')" }} />
         <div className="hero-overlay" />
-        <div className="hero-content">
+        <div className="hero-content cafe-animate">
           <img src="/cafe-logo-transparent.png" alt="Spoiled Brats Cafe" className="hero-logo" />
           <h1 className="hero-tagline">Where Coffee Meets Creativity</h1>
           <p className="hero-desc">
@@ -95,7 +121,7 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Gallery */}
-      <section className="section">
+      <section className="section cafe-animate">
         <h2 className="section-title">Our Space</h2>
         <div className="gallery-strip">
           {GALLERY.map(src => (
@@ -105,10 +131,11 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Find Us */}
-      <section className="section">
+      <section className="section cafe-animate">
         <h2 className="section-title">Find Us</h2>
         <div className="info-grid">
-          <div className="info-card">
+          <div className="info-card" style={{ position:'relative', overflow:'hidden' }}>
+            <IonRippleEffect />
             <IonIcon icon={locationOutline} className="info-icon" />
             <div>
               <p className="info-label">Address</p>
@@ -140,7 +167,7 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Social */}
-      <section className="section">
+      <section className="section cafe-animate">
         <h2 className="section-title">Follow Us</h2>
         <div className="social-row">
           <a href="https://instagram.com/spoiledbratscafe" target="_blank" rel="noreferrer" className="social-btn social-btn--instagram">
@@ -155,7 +182,7 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Highlights */}
-      <section className="section">
+      <section className="section cafe-animate">
         <h2 className="section-title">What's Brewing</h2>
         <div className="promo-grid">
           <div className="promo-card" style={{ backgroundImage: `url('${PROMOS[0]}')` }}>
@@ -176,7 +203,7 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Reviews */}
-      <section className="section">
+      <section className="section cafe-animate">
         <div className="reviews-header">
           <h2 className="section-title" style={{ margin: 0 }}>What Guests Say</h2>
           <a
@@ -198,7 +225,8 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
         </div>
         <div className="reviews-strip" style={{ marginTop: 18 }}>
           {REVIEWS.map((r, i) => (
-            <div key={i} className="review-card">
+            <div key={i} className="review-card" style={{ position:'relative' }}>
+              <IonRippleEffect />
               <div className="review-stars">
                 {[1, 2, 3, 4, 5].map(s => (
                   <IonIcon key={s} icon={star} className="star-icon" />
@@ -218,7 +246,7 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* CTA */}
-      <section className="section cta-section">
+      <section className="section cta-section cafe-animate">
         <h2 className="cta-title">Ready to Create a Memory?</h2>
         <p className="cta-desc">Reserve the cafe for your next intimate event or gathering.</p>
         <IonButton shape="round" size="large" className="cta-btn" onClick={onSchedule}>

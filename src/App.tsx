@@ -1,7 +1,7 @@
 import {
   IonApp, IonIcon, IonLabel,
-  IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,
-  setupIonicReact,
+  IonRouterOutlet, IonSpinner, IonTabBar, IonTabButton, IonTabs,
+  createAnimation, setupIonicReact,
 } from '@ionic/react'
 import { IonReactRouter } from '@ionic/react-router'
 import { cafeOutline, musicalNotesOutline, personCircleOutline, shieldOutline } from 'ionicons/icons'
@@ -28,10 +28,43 @@ import '@ionic/react/css/display.css'
 /* Acoustic Brew theme */
 import './theme/variables.css'
 
-setupIonicReact({ mode: 'md' })
+// Custom page transition: smooth fade-up slide
+const pageTransition = (baseEl: HTMLElement, opts: { enteringEl: HTMLElement; leavingEl: HTMLElement }) => {
+  const enter = createAnimation()
+    .addElement(opts.enteringEl)
+    .duration(300)
+    .easing('cubic-bezier(0.22, 1, 0.36, 1)')
+    .fromTo('opacity', '0', '1')
+    .fromTo('transform', 'translateY(16px)', 'translateY(0px)')
+
+  const leave = createAnimation()
+    .addElement(opts.leavingEl)
+    .duration(180)
+    .easing('ease-out')
+    .fromTo('opacity', '1', '0')
+    .fromTo('transform', 'translateY(0px)', 'translateY(-8px)')
+
+  return createAnimation().addAnimation([enter, leave])
+}
+
+setupIonicReact({ mode: 'md', navAnimation: pageTransition as any })
 
 function AppTabs() {
-  const { isAdmin } = useAuth()
+  const { isAdmin, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', height: '100vh', gap: 24,
+        background: '#fff8f8',
+      }}>
+        <img src="/cafe-logo-transparent.png" alt="Spoiled Brats HQ"
+          style={{ height: 80, width: 'auto', objectFit: 'contain' }} />
+        <IonSpinner name="crescent" color="primary" style={{ width: 32, height: 32 }} />
+      </div>
+    )
+  }
 
   return (
     <IonTabs>
@@ -56,9 +89,6 @@ function AppTabs() {
           <IonLabel>Studio</IonLabel>
         </IonTabButton>
 
-        {/* Spacer pushes remaining tabs right */}
-        <IonTabButton tab="spacer" disabled style={{ flex: 1, pointerEvents: 'none' }} />
-
         {/* Admin tab (only visible to admins) */}
         {isAdmin && (
           <IonTabButton tab="admin" href="/admin">
@@ -67,7 +97,7 @@ function AppTabs() {
           </IonTabButton>
         )}
 
-        {/* Right: Account */}
+        {/* Account — rightmost */}
         <IonTabButton tab="account" href="/account">
           <IonIcon icon={personCircleOutline} />
           <IonLabel>Account</IonLabel>

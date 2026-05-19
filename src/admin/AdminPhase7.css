@@ -1,0 +1,220 @@
+/* =====================================================
+   ADMIN PHASE 7 — Users · Menu · Settings
+   ===================================================== */
+
+/* ---- Shared search bar ---- */
+.admin-search { margin-bottom: 16px; }
+.admin-search ion-input {
+  --background: #ffffff;
+  --border-radius: var(--radius-full);
+  --border-color: var(--color-outline-variant);
+  --highlight-color-focused: var(--color-primary);
+  --padding-start: 14px;
+}
+
+/* ---- User list ---- */
+.user-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(45,19,32,0.05);
+  transition: box-shadow 0.15s, transform 0.1s;
+}
+.user-card:hover { box-shadow: 0 4px 16px rgba(45,19,32,0.10); transform: translateY(-1px); }
+.user-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-family: var(--font-headline);
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.user-avatar.is-admin { background: var(--color-tertiary); }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 14px; font-weight: 700; color: var(--color-on-surface); margin: 0 0 2px; }
+.user-sub  { font-size: 12px; color: var(--color-on-surface-variant); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+.role-admin { background: var(--color-tertiary); color: #ffffff; }
+.role-user  { background: var(--color-surface-container); color: var(--color-on-surface-variant); }
+
+/* ---- Menu list ---- */
+.menu-add-btn {
+  --border-radius: var(--radius-full);
+  margin-bottom: 16px;
+}
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.menu-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(45,19,32,0.06);
+  transition: box-shadow 0.15s, transform 0.1s;
+}
+.menu-card:hover { box-shadow: 0 4px 16px rgba(45,19,32,0.10); transform: translateY(-1px); }
+.menu-img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  background: var(--color-surface-container);
+}
+.menu-img-placeholder {
+  width: 100%;
+  height: 110px;
+  background: var(--color-surface-container-low);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-outline);
+  font-size: 32px;
+}
+.menu-card-body { padding: 10px 12px; }
+.menu-card-name { font-size: 13px; font-weight: 700; color: var(--color-on-surface); margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.menu-card-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.menu-card-price { font-size: 13px; font-weight: 700; color: var(--color-primary); }
+.menu-card-cat {
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--color-surface-container);
+  color: var(--color-on-surface-variant);
+  border-radius: var(--radius-full);
+  padding: 2px 7px;
+}
+.menu-unavailable { opacity: 0.5; }
+
+/* ---- Menu modal ---- */
+.menu-modal-img-wrap {
+  width: 100%;
+  height: 160px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface-container-low);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  position: relative;
+  cursor: pointer;
+  border: 2px dashed var(--color-outline-variant);
+}
+.menu-modal-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+.menu-img-upload-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-on-surface-variant);
+  font-size: 13px;
+  z-index: 1;
+}
+.menu-img-upload-hint ion-icon { font-size: 28px; }
+.menu-price-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.menu-avail-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+.menu-avail-label { font-size: 14px; font-weight: 600; color: var(--color-on-surface); }
+.menu-delete-btn { --border-radius: var(--radius); margin-top: 8px; }
+
+/* ---- Schedule settings ---- */
+.settings-venue-segment { margin-bottom: 20px; }
+.settings-venue-segment ion-segment-button {
+  --color: var(--color-on-surface-variant);
+  --color-checked: #fff8f8;
+  --background-checked: var(--color-on-surface);
+  --indicator-color: transparent;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  min-height: 36px;
+}
+.hours-table { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.hours-row {
+  display: grid;
+  grid-template-columns: 90px 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  box-shadow: 0 1px 6px rgba(45,19,32,0.05);
+}
+.hours-day {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  text-transform: capitalize;
+}
+.hours-separator {
+  font-size: 13px;
+  color: var(--color-outline);
+  text-align: center;
+}
+.hours-input {
+  --background: var(--color-surface-container-low);
+  --border-radius: var(--radius-sm);
+  --padding-start: 8px;
+  --padding-end: 8px;
+  font-size: 13px;
+  font-family: var(--font-body);
+}
+.settings-save-btn {
+  --border-radius: var(--radius);
+  --background: var(--color-primary);
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+/* ---- Shared modal fields ---- */
+.p7-field { margin-bottom: 14px; }
+.p7-input {
+  --background: #ffffff;
+  --border-color: var(--color-outline-variant);
+  --border-radius: var(--radius);
+  --highlight-color-focused: var(--color-primary);
+  font-family: var(--font-body);
+}
+.p7-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.p7-modal-actions ion-button { flex: 1; --border-radius: var(--radius); font-weight: 700; }
+.p7-save-btn { --background: var(--color-primary); }
+
+/* ---- Empty state ---- */
+.admin-empty {
+  display: flex; flex-direction: column;
+  align-items: center; padding: 48px 24px; gap: 10px;
+  text-align: center; color: var(--color-on-surface-variant);
+}
+.admin-empty ion-icon { font-size: 40px; }
+.admin-empty p { font-size: 14px; margin: 0; }

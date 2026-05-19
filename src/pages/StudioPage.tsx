@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import {
   IonContent, IonHeader, IonIcon, IonPage,
   IonSegment, IonSegmentButton, IonLabel, IonButton, IonToolbar, IonTitle,
+  IonRippleEffect,
+  createAnimation, useIonViewDidEnter, useIonViewWillEnter,
 } from '@ionic/react'
 import {
   logoInstagram, logoFacebook, musicalNotesOutline,
@@ -59,6 +61,27 @@ export default function StudioPage() {
     if (params.get('tab') === 'bookings') setTab('book')
   }, [location.search])
 
+  useIonViewWillEnter(() => {
+    document.querySelectorAll('.studio-animate').forEach(el => {
+      ;(el as HTMLElement).style.opacity = '0'
+      ;(el as HTMLElement).style.transform = 'translateY(22px)'
+    })
+  })
+
+  useIonViewDidEnter(() => {
+    const targets = Array.from(document.querySelectorAll('.studio-animate'))
+    targets.forEach((el, i) => {
+      createAnimation()
+        .addElement(el as HTMLElement)
+        .duration(540)
+        .delay(i * 70)
+        .easing('cubic-bezier(0.22, 1, 0.36, 1)')
+        .fromTo('opacity', '0', '1')
+        .fromTo('transform', 'translateY(22px)', 'translateY(0px)')
+        .play()
+    })
+  })
+
   return (
     <IonPage>
       <IonHeader>
@@ -100,9 +123,10 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
     <div className="landing-page">
 
       {/* Hero */}
-      <section className="hero-section" style={{ backgroundImage: "url('/studio1.jpg')" }}>
+      <section className="hero-section">
+        <div className="hero-bg" style={{ backgroundImage: "url('/studio1.jpg')" }} />
         <div className="hero-overlay" />
-        <div className="hero-content">
+        <div className="hero-content studio-animate">
           <img src="/studio-logo-transparent.png" alt="Kajon Music Studio" className="hero-logo" />
           <h1 className="hero-tagline">Precision. Sound. Soul.</h1>
           <p className="hero-desc">
@@ -116,7 +140,7 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Gallery */}
-      <section className="section">
+      <section className="section studio-animate">
         <h2 className="section-title">Inside the Studio</h2>
         <div className="gallery-strip">
           {GALLERY.map(src => (
@@ -126,7 +150,7 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Services */}
-      <section className="section">
+      <section className="section studio-animate">
         <h2 className="section-title">Our Services</h2>
         <div className="services-grid">
           {services.map(name => {
@@ -143,7 +167,7 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Studio features */}
-      <section className="section">
+      <section className="section studio-animate">
         <h2 className="section-title">Studio Amenities</h2>
         <ul className="features-list">
           {STUDIO_FEATURES.map(f => (
@@ -156,7 +180,7 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Social */}
-      <section className="section">
+      <section className="section studio-animate">
         <h2 className="section-title">Follow the Sound</h2>
         <div className="social-row">
           <a href="https://instagram.com/kajonmusicstudio" target="_blank" rel="noreferrer" className="social-btn social-btn--instagram">
@@ -171,7 +195,7 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
       </section>
 
       {/* Reviews */}
-      <section className="section">
+      <section className="section studio-animate">
         <h2 className="section-title">What Artists Say</h2>
         <div className="reviews-strip">
           {STUDIO_REVIEWS.map((r, i) => (
