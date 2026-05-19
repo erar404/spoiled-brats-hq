@@ -157,12 +157,9 @@ ion-modal::part(backdrop) {
   backdrop-filter: blur(4px);
 }
 
-/* Segment global */
+/* Segment base — individual segments use component-specific CSS for borders */
 ion-segment {
   --background: transparent;
-  border: 1.5px solid var(--color-outline-variant);
-  border-radius: var(--radius-full);
-  overflow: hidden;
 }
 
 h1, h2, h3, h4 {
