@@ -1,0 +1,105 @@
+/* =============================================
+   STUDIO BOOKING — additional styles
+   (base styles shared from CafeBooking.css)
+   ============================================= */
+
+/* Booking type segment */
+.studio-type-wrap {
+  margin-bottom: 18px;
+}
+.studio-type-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 8px 2px;
+}
+.studio-type-segment {
+  --background: transparent;
+  border: 1.5px solid var(--color-outline-variant);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.studio-type-segment ion-segment-button {
+  --color: var(--color-on-surface-variant);
+  --color-checked: #fff8f8;
+  --background-checked: var(--color-primary);
+  --indicator-color: transparent;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  min-height: 40px;
+  gap: 4px;
+}
+.studio-type-segment ion-segment-button ion-icon {
+  font-size: 16px;
+}
+
+/* Time row */
+.studio-time-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 0;
+}
+.studio-time-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 14px;
+  color: var(--color-outline);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Hours note */
+.studio-hours-note-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 14px;
+}
+.studio-hours-note-item ion-note {
+  font-size: 12px;
+  color: var(--color-on-surface-variant);
+  line-height: 1.5;
+}
+
+/* My bookings — studio extras */
+.studio-bk-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.studio-type-chip {
+  --color: #ffffff;
+  height: 22px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  margin: 0;
+  padding: 0 8px;
+}
+.studio-type-chip ion-icon { font-size: 12px; }
+.studio-type-chip ion-label { font-size: 11px !important; font-weight: 600; }
+
+/* FullCalendar time grid overrides */
+.cal-wrap .fc-timegrid-slot-label-cushion,
+.cal-wrap .fc-timegrid-axis-cushion {
+  font-family: var(--font-body) !important;
+  font-size: 11px !important;
+  color: var(--color-on-surface-variant) !important;
+}
+.cal-wrap .fc-timegrid-event {
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-body) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+.cal-wrap .fc-v-event .fc-event-title {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}

@@ -1,0 +1,254 @@
+/* =============================================
+   CAFE BOOKING — Acoustic Brew theme
+   ============================================= */
+
+/* ---- Not logged in ---- */
+.booking-login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  gap: 12px;
+}
+.prompt-icon { font-size: 52px; color: var(--color-outline); }
+.booking-login-prompt h3 {
+  font-family: var(--font-headline);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+.booking-login-prompt p {
+  font-size: 14px;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 8px;
+}
+
+/* ---- Page wrapper ---- */
+.booking-page { background: var(--color-background); padding-bottom: 48px; }
+
+/* ---- Section ---- */
+.booking-section { padding: 24px 20px 0; }
+
+.booking-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.bsh-icon  { font-size: 22px; color: var(--color-primary); flex-shrink: 0; }
+.bsh-title {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+/* ---- Booking form card ---- */
+.booking-card {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 24px 20px;
+  box-shadow: 0 4px 24px rgba(45, 19, 32, 0.08);
+}
+
+.bk-field { margin-bottom: 16px; }
+.bk-field--indent { margin-left: 0; }
+.bk-input {
+  --background: #ffffff;
+  --border-color: var(--color-outline-variant);
+  --border-radius: var(--radius);
+  --highlight-color-focused: var(--color-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+/* Toggle row */
+.bk-toggle-item {
+  --background: var(--color-surface-container-low);
+  --border-radius: var(--radius);
+  --padding-start: 14px;
+  --padding-end: 14px;
+  --inner-padding-end: 0;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+.bk-toggle-item h3 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.bk-toggle-item ion-note { font-size: 12px; }
+
+/* Messages */
+.bk-msg {
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.bk-msg p { margin: 0; }
+.bk-msg--error   { background: #ffdad6; color: #93000a; }
+.bk-msg--success { background: #d6e9c2; color: #1a3d0a; }
+
+/* Submit button */
+.bk-submit {
+  --border-radius: var(--radius);
+  --background: var(--color-primary);
+  font-weight: 700;
+  font-size: 15px;
+  height: 48px;
+  margin-top: 8px;
+}
+
+/* ---- Calendar ---- */
+.cal-note {
+  font-size: 13px;
+  color: var(--color-on-surface-variant);
+  margin: -8px 0 14px;
+  line-height: 1.5;
+}
+.cal-wrap {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  box-shadow: 0 4px 24px rgba(45, 19, 32, 0.07);
+  overflow: hidden;
+}
+
+/* FullCalendar overrides */
+.cal-wrap .fc-toolbar-title {
+  font-family: var(--font-headline) !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--color-on-surface) !important;
+}
+.cal-wrap .fc-button {
+  background: transparent !important;
+  border: 1.5px solid var(--color-outline-variant) !important;
+  color: var(--color-on-surface) !important;
+  border-radius: var(--radius) !important;
+  font-family: var(--font-body) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 5px 10px !important;
+  box-shadow: none !important;
+}
+.cal-wrap .fc-button:hover {
+  background: var(--color-surface-container-low) !important;
+}
+.cal-wrap .fc-button-active,
+.cal-wrap .fc-button:not(:disabled):active {
+  background: var(--color-on-surface) !important;
+  color: var(--color-background) !important;
+  border-color: var(--color-on-surface) !important;
+}
+.cal-wrap .fc-day-today { background: #fff8f8 !important; }
+.cal-wrap .fc-col-header-cell-cushion {
+  font-family: var(--font-body) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--color-on-surface-variant) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.cal-wrap .fc-daygrid-day-number {
+  font-family: var(--font-body) !important;
+  font-size: 13px !important;
+  color: var(--color-on-surface) !important;
+}
+.cal-wrap .fc-event {
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-body) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: default;
+}
+
+/* Legend */
+.cal-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding: 0 4px;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { font-size: 12px; color: var(--color-on-surface-variant); font-weight: 500; }
+
+/* ---- My Bookings ---- */
+.bk-center { display: flex; justify-content: center; padding: 32px 0; }
+.bk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 24px;
+  text-align: center;
+  color: var(--color-on-surface-variant);
+}
+.bk-empty ion-icon { font-size: 36px; }
+.bk-empty p { font-size: 14px; margin: 0; }
+
+.my-bk-list { background: transparent; padding: 0; }
+.my-bk-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 12px rgba(45, 19, 32, 0.06);
+}
+.my-bk-body { flex: 1; min-width: 0; }
+.my-bk-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.my-bk-meta {
+  font-size: 12px;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.my-bk-meta ion-icon { font-size: 12px; flex-shrink: 0; }
+.my-bk-details {
+  font-size: 12px;
+  color: var(--color-on-surface-variant);
+  margin: 4px 0 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Status badges (supplement variables.css) */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+  padding: 4px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-badge ion-icon { font-size: 12px; }
+.badge-pending   { --background: #fea451; --color: #2d1320; }
+.badge-approved  { --background: #687959; --color: #ffffff; }
+.badge-rejected  { --background: #ba1a1a; --color: #ffffff; }
+.badge-cancelled { --background: #8a7269; --color: #ffffff; }

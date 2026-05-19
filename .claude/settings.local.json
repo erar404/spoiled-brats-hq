@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp *)",
+      "mcp__stitch__list_design_systems",
+      "mcp__stitch__list_projects",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__list_migrations",
+      "mcp__stitch__list_screens",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__list_storage_buckets",
+      "mcp__stitch__get_screen",
+      "WebFetch(domain:contribution.usercontent.google.com)",
+      "WebSearch",
+      "WebFetch(domain:ph.openrice.com)",
+      "WebFetch(domain:www.remyeats.com)",
+      "WebFetch(domain:wanderlog.com)",
+      "mcp__ide__getDiagnostics"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
+}
