@@ -107,6 +107,23 @@
 }
 .menu-unavailable { opacity: 0.5; }
 
+/* Limited-time badge on admin grid cards */
+.menu-limited-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: var(--color-secondary);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  pointer-events: none;
+}
+
 /* ---- Menu modal ---- */
 .menu-modal-img-wrap {
   width: 100%;
@@ -191,6 +208,15 @@
   --background: var(--color-primary);
   font-weight: 700;
   margin-bottom: 32px;
+}
+
+/* ---- Pricing section title ---- */
+.pricing-section-title {
+  font-family: var(--font-headline);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 28px 0 12px;
 }
 
 /* ---- Shared modal fields ---- */

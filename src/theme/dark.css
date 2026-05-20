@@ -1,0 +1,378 @@
+/* =====================================================
+   DARK MODE — Acoustic Brew Dark
+   Applied via html.dark (toggled by DarkModeContext)
+
+   Scene: late-night session at the studio after the
+   cafe has closed — warm amber glow, deep espresso
+   walls, no harsh whites.
+   ===================================================== */
+
+/* Smooth theme transitions — only on interactive surfaces */
+html {
+  transition: background-color 0.28s ease;
+}
+ion-app, ion-content, ion-toolbar, ion-tab-bar,
+ion-modal, ion-card, ion-item {
+  transition: background-color 0.28s ease, --background 0.28s ease;
+}
+
+/* ── Design tokens ──────────────────────────────────── */
+html.dark {
+  color-scheme: dark;
+
+  /* Ionic system */
+  --ion-background-color:     #0f0a0d;
+  --ion-background-color-rgb: 15, 10, 13;
+  --ion-text-color:           #f0e6df;
+  --ion-text-color-rgb:       240, 230, 223;
+
+  --ion-color-primary:          #e87040;
+  --ion-color-primary-rgb:      232, 112, 64;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade:    #cf6038;
+  --ion-color-primary-tint:     #ea7f58;
+
+  --ion-card-background:           #1e1118;
+  --ion-item-background:           #1e1118;
+  --ion-toolbar-background:        #180d13;
+  --ion-tab-bar-background:        #180d13;
+  --ion-tab-bar-border-color:      #3d2a2e;
+  --ion-tab-bar-color:             #7a6560;
+  --ion-tab-bar-color-selected:    #e87040;
+
+  /* Custom design tokens */
+  --color-primary:               #e87040;
+  --color-primary-container:     #c05830;
+  --color-secondary:             #fea451;
+  --color-tertiary:              #8a9e72;
+  --color-background:            #0f0a0d;
+  --color-surface:               #1e1118;
+  --color-surface-container:     #2d1a24;
+  --color-surface-container-low: #180d13;
+  --color-on-surface:            #f0e6df;
+  --color-on-surface-variant:    #b8a098;
+  --color-outline:               #6d5550;
+  --color-outline-variant:       #3d2a2e;
+}
+
+/* ── Ionic component overrides ───────────────────────── */
+html.dark ion-toolbar {
+  --background: #180d13;
+  --border-color: #3d2a2e;
+}
+
+html.dark ion-tab-bar {
+  --background: #180d13;
+  border-top-color: #3d2a2e;
+}
+
+html.dark ion-input,
+html.dark ion-textarea,
+html.dark ion-select {
+  --background: #2d1a24;
+  --border-color: #3d2a2e;
+  --color: #f0e6df;
+  --placeholder-color: #6d5550;
+}
+
+html.dark ion-item {
+  --background: #1e1118;
+  --border-color: #3d2a2e;
+  --color: #f0e6df;
+}
+
+html.dark ion-segment {
+  --background: transparent;
+}
+
+html.dark ion-modal {
+  --background: #1e1118;
+}
+html.dark ion-modal::part(backdrop) {
+  background: rgba(10, 5, 8, 0.72);
+}
+
+html.dark ion-skeleton-text {
+  --background: #2d1a24;
+  --background-rgb: 45, 26, 36;
+}
+
+html.dark ion-refresher {
+  --color: #e87040;
+}
+
+html.dark ion-note {
+  color: var(--color-on-surface-variant);
+}
+
+/* ── Hard-coded white backgrounds ────────────────────── */
+
+/* Auth card */
+html.dark .auth-card {
+  background: #1e1118;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.55), 0 32px 80px rgba(0,0,0,0.3);
+}
+html.dark .auth-wrap {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,112,64,0.10) 0%, transparent 60%),
+    #0f0a0d;
+}
+html.dark .auth-wrap::before {
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary), var(--color-tertiary));
+}
+
+/* Booking cards */
+html.dark .booking-card,
+html.dark .cal-wrap {
+  background: #1e1118;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+}
+html.dark .my-bk-item {
+  background: #1e1118;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+html.dark .bk-toggle-item {
+  --background: #2d1a24;
+}
+
+/* Info cards */
+html.dark .info-card {
+  background: #1e1118;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.3);
+}
+
+/* Review cards */
+html.dark .review-card {
+  background: #1e1118;
+  box-shadow: 0 3px 18px rgba(0,0,0,0.3);
+}
+
+/* Profile cards */
+html.dark .profile-info-card,
+html.dark .profile-action-btn {
+  background: #1e1118;
+  border-color: #3d2a2e;
+  color: #f0e6df;
+}
+html.dark .profile-action-btn:hover {
+  background: #2d1a24;
+}
+
+/* Skeletons */
+html.dark .promo-admin-card,
+html.dark .user-card,
+html.dark .menu-card,
+html.dark .gallery-card,
+html.dark .hours-row,
+html.dark .feature-item {
+  background: #1e1118;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+html.dark .feature-item {
+  color: #f0e6df;
+}
+
+/* Studio rate cards */
+html.dark .studio-rate-card {
+  background: #1e1118;
+}
+
+/* Promo list cards (landing) */
+html.dark .promo-list-card {
+  background: #1e1118;
+  box-shadow: 0 3px 16px rgba(0,0,0,0.35);
+}
+
+/* Cafe menu cards */
+html.dark .cafe-menu-card {
+  background: #1e1118;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
+/* Menu filter chips */
+html.dark .menu-cat-chip {
+  border-color: #3d2a2e;
+  color: #b8a098;
+}
+html.dark .menu-cat-chip:hover {
+  background: #2d1a24;
+  border-color: #e87040;
+  color: #e87040;
+}
+html.dark .menu-cat-chip--active {
+  background: #e87040;
+  border-color: #e87040;
+  color: #ffffff;
+}
+
+/* Admin phase 7 */
+html.dark .admin-search ion-input {
+  --background: #1e1118;
+}
+html.dark .p7-input {
+  --background: #2d1a24;
+  --border-color: #3d2a2e;
+}
+
+/* Gallery cards */
+html.dark .gallery-card-img {
+  background-color: #2d1a24;
+}
+html.dark .gallery-icon-btn:hover {
+  background: #2d1a24;
+}
+
+/* Hero manager */
+html.dark .hero-manager-preview,
+html.dark .gallery-modal-img {
+  background-color: #2d1a24;
+}
+
+/* Section tabs (gallery) */
+html.dark .gallery-section-tab {
+  border-color: #3d2a2e;
+  color: #b8a098;
+}
+html.dark .gallery-section-tab:hover {
+  border-color: #e87040;
+  color: #e87040;
+}
+html.dark .gallery-section-tab--active {
+  background: #f0e6df;
+  border-color: #f0e6df;
+  color: #0f0a0d;
+}
+
+/* Method buttons (auth) */
+html.dark .method-btn {
+  border-color: #3d2a2e;
+  color: #b8a098;
+}
+html.dark .method-btn.active {
+  background: #f0e6df;
+  color: #0f0a0d;
+  border-color: #f0e6df;
+}
+
+/* Area select (phone input) */
+html.dark .auth-area-select {
+  background-color: #2d1a24;
+  border-color: #3d2a2e;
+  color: #f0e6df;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='none' stroke='%23b8a098' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+}
+
+/* Redirect notice */
+html.dark .auth-notice {
+  background: rgba(254,164,81,0.08);
+  border-color: rgba(254,164,81,0.25);
+  color: #f0e6df;
+}
+
+/* Landing page */
+html.dark .landing-page {
+  background:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")
+    repeat,
+    #0f0a0d;
+}
+
+html.dark .section-title { color: #f0e6df; }
+html.dark .section-title::after {
+  background: linear-gradient(to right, #3d2a2e, transparent);
+}
+
+html.dark .info-label { color: #e87040; }
+html.dark .info-value { color: #f0e6df; }
+
+html.dark .google-rating-badge {
+  background: #1e1118;
+  border-color: #3d2a2e;
+  color: #f0e6df;
+}
+
+html.dark .review-text { color: #f0e6df; }
+html.dark .review-name { color: #f0e6df; }
+html.dark .review-role { color: #b8a098; }
+html.dark .review-avatar {
+  background: #2d1a24;
+  color: #e87040;
+  border-color: #3d2a2e;
+}
+
+html.dark .services-grid .service-card {
+  background: #1e1118;
+}
+html.dark .service-card--featured {
+  background: #2d1a24;
+}
+html.dark .service-name { color: #f0e6df; }
+html.dark .service-desc { color: #b8a098; }
+
+html.dark .features-list .feature-item {
+  background: #1e1118;
+  color: #f0e6df;
+}
+
+html.dark .landing-footer {
+  background: #070407;
+  color: rgba(240,230,223,0.55);
+}
+
+html.dark .promo-list-body { background: transparent; }
+html.dark .promo-list-title { color: #f0e6df; }
+html.dark .promo-list-desc { color: #b8a098; }
+
+/* Venue sections on home page (cafe side) */
+html.dark .venue-section--cafe {
+  background: #180d13;
+}
+html.dark .venue-section--cafe .venue-name { color: #f0e6df; }
+html.dark .venue-section--cafe .venue-desc { color: #b8a098; }
+html.dark .venue-section--cafe .venue-chip {
+  background: #2d1a24;
+  border-color: #3d2a2e;
+  color: #f0e6df;
+}
+html.dark .venue-section--cafe .venue-contact-row { color: #b8a098; }
+html.dark .venue-section--cafe .venue-review {
+  background: #2d1a24;
+  box-shadow: none;
+}
+html.dark .venue-section--cafe .venue-review-text  { color: #f0e6df; }
+html.dark .venue-section--cafe .venue-review-name  { color: #f0e6df; }
+html.dark .venue-section--cafe .venue-review-role  { color: #b8a098; }
+html.dark .venue-section--cafe .venue-review-avatar {
+  background: #2d1a24;
+  color: #e87040;
+  border-color: #3d2a2e;
+}
+html.dark .venue-section--cafe .venue-more-link { color: #b8a098; }
+
+/* FullCalendar dark overrides */
+html.dark .cal-wrap { background: #1e1118 !important; }
+html.dark .cal-wrap .fc-toolbar-title { color: #f0e6df !important; }
+html.dark .cal-wrap .fc-col-header-cell-cushion { color: #b8a098 !important; }
+html.dark .cal-wrap .fc-daygrid-day-number { color: #f0e6df !important; }
+html.dark .cal-wrap .fc-day-today { background: #2d1a24 !important; }
+html.dark .cal-wrap .fc-button {
+  background: transparent !important;
+  border-color: #3d2a2e !important;
+  color: #f0e6df !important;
+}
+html.dark .cal-wrap .fc-button:hover { background: #2d1a24 !important; }
+html.dark .cal-wrap .fc-button-active,
+html.dark .cal-wrap .fc-button:not(:disabled):active {
+  background: #f0e6df !important;
+  color: #0f0a0d !important;
+  border-color: #f0e6df !important;
+}
+html.dark .cal-wrap .fc-theme-standard .fc-scrollgrid,
+html.dark .cal-wrap .fc-theme-standard td,
+html.dark .cal-wrap .fc-theme-standard th {
+  border-color: #3d2a2e !important;
+}
+html.dark .cal-wrap .fc-timegrid-slot-label-cushion { color: #b8a098 !important; }
+html.dark .cal-wrap .fc-timegrid-axis-cushion { color: #b8a098 !important; }

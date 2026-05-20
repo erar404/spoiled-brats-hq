@@ -1,16 +1,19 @@
 import {
-  IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
+  IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
   IonSegment, IonSegmentButton, IonLabel,
 } from '@ionic/react'
 import { useState } from 'react'
 import { AdminRoute } from '../components/ProtectedRoute'
+import DarkModeToggle from '../components/DarkModeToggle'
 import AdminCafeBookings from '../admin/AdminCafeBookings'
 import AdminStudioBookings from '../admin/AdminStudioBookings'
 import AdminUserList from '../admin/AdminUserList'
 import AdminMenuList from '../admin/AdminMenuList'
 import AdminScheduleSettings from '../admin/AdminScheduleSettings'
+import { AdminPhotosTab } from '../admin/AdminGalleryManager'
+import AdminPromotions from '../admin/AdminPromotions'
 
-type AdminTab = 'cafe-bookings' | 'studio-bookings' | 'users' | 'menu' | 'settings'
+type AdminTab = 'cafe-bookings' | 'studio-bookings' | 'users' | 'menu' | 'photos' | 'promotions' | 'settings'
 
 function AdminDashboard() {
   const [tab, setTab] = useState<AdminTab>('cafe-bookings')
@@ -20,6 +23,7 @@ function AdminDashboard() {
       <IonHeader>
         <IonToolbar>
           <IonTitle>Admin Dashboard</IonTitle>
+          <IonButtons slot="end"><DarkModeToggle /></IonButtons>
         </IonToolbar>
         <IonToolbar>
           <IonSegment
@@ -39,6 +43,12 @@ function AdminDashboard() {
             <IonSegmentButton value="menu">
               <IonLabel>Menu</IonLabel>
             </IonSegmentButton>
+            <IonSegmentButton value="photos">
+              <IonLabel>Photos</IonLabel>
+            </IonSegmentButton>
+            <IonSegmentButton value="promotions">
+              <IonLabel>Promotions</IonLabel>
+            </IonSegmentButton>
             <IonSegmentButton value="settings">
               <IonLabel>Settings</IonLabel>
             </IonSegmentButton>
@@ -52,7 +62,9 @@ function AdminDashboard() {
           {tab === 'studio-bookings' && <AdminStudioBookings />}
           {tab === 'users'    && <AdminUserList />}
           {tab === 'menu'     && <AdminMenuList />}
-          {tab === 'settings' && <AdminScheduleSettings />}
+          {tab === 'photos'      && <AdminPhotosTab />}
+          {tab === 'promotions'  && <AdminPromotions />}
+          {tab === 'settings'    && <AdminScheduleSettings />}
         </div>
       </IonContent>
     </IonPage>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { IonButton, IonIcon, IonInput, IonSegment, IonSegmentButton, IonLabel, IonSpinner } from '@ionic/react'
-import { cafeOutline, checkmarkOutline, musicalNotesOutline, saveOutline } from 'ionicons/icons'
+import { cafeOutline, musicalNotesOutline, saveOutline, qrCodeOutline } from 'ionicons/icons'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../hooks/useToast'
 import './AdminBookings.css'
@@ -23,24 +23,40 @@ const DEFAULT_HOURS: WeekHours = {
 
 type Venue = 'cafe' | 'studio'
 
+interface StudioPricing { rehearsal: number; recording: number }
+const DEFAULT_PRICING: StudioPricing = { rehearsal: 600, recording: 1200 }
+
 export default function AdminScheduleSettings() {
   const { toast, ToastEl } = useToast()
-  const [venue,       setVenue]       = useState<Venue>('cafe')
-  const [cafeHours,   setCafeHours]   = useState<WeekHours>(DEFAULT_HOURS)
-  const [studioHours, setStudioHours] = useState<WeekHours>(DEFAULT_HOURS)
-  const [loading,     setLoading]     = useState(true)
-  const [saving,      setSaving]      = useState(false)
+  const [venue,         setVenue]         = useState<Venue>('studio')
+  const [cafeHours,     setCafeHours]     = useState<WeekHours>(DEFAULT_HOURS)
+  const [studioHours,   setStudioHours]   = useState<WeekHours>(DEFAULT_HOURS)
+  const [pricing,       setPricing]       = useState<StudioPricing>(DEFAULT_PRICING)
+  const [gcashNum,      setGcashNum]      = useState('')
+  const [gcashName,     setGcashName]     = useState('')
+  const [gcashQrUrl,    setGcashQrUrl]    = useState('')
+  const [loading,       setLoading]       = useState(true)
+  const [saving,        setSaving]        = useState(false)
+  const [savingPricing, setSavingPricing] = useState(false)
+  const [savingGcash,   setSavingGcash]   = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
       .from('system_settings')
       .select('key, value')
-      .in('key', ['cafe_hours', 'studio_hours'])
+      .in('key', ['cafe_hours', 'studio_hours', 'studio_pricing', 'gcash_info'])
 
     data?.forEach(row => {
-      if (row.key === 'cafe_hours')   setCafeHours(row.value as WeekHours)
-      if (row.key === 'studio_hours') setStudioHours(row.value as WeekHours)
+      if (row.key === 'cafe_hours')    setCafeHours(row.value as WeekHours)
+      if (row.key === 'studio_hours')  setStudioHours(row.value as WeekHours)
+      if (row.key === 'studio_pricing') setPricing(row.value as unknown as StudioPricing)
+      if (row.key === 'gcash_info') {
+        const g = row.value as { number?: string; name?: string; qr_url?: string }
+        setGcashNum(g.number ?? '')
+        setGcashName(g.name ?? '')
+        setGcashQrUrl(g.qr_url ?? '')
+      }
     })
     setLoading(false)
   }, [])
@@ -66,6 +82,32 @@ export default function AdminScheduleSettings() {
     setSaving(false)
     if (error) toast(error.message, 'danger')
     else toast(`${venue === 'cafe' ? 'Cafe' : 'Studio'} hours saved.`, 'success')
+  }
+
+  async function saveGcash() {
+    setSavingGcash(true)
+    const { error } = await supabase.from('system_settings').upsert({
+      key: 'gcash_info',
+      value: { number: gcashNum.trim(), name: gcashName.trim(), qr_url: gcashQrUrl.trim() } as unknown as Record<string, unknown>,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'key' })
+    setSavingGcash(false)
+    if (error) toast(error.message, 'danger')
+    else toast('GCash payment info saved.', 'success')
+  }
+
+  async function savePricing() {
+    if (pricing.rehearsal <= 0 || pricing.recording <= 0)
+      return toast('Rates must be greater than zero.', 'warning')
+    setSavingPricing(true)
+    const { error } = await supabase.from('system_settings').upsert({
+      key: 'studio_pricing',
+      value: pricing as unknown as Record<string, unknown>,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'key' })
+    setSavingPricing(false)
+    if (error) toast(error.message, 'danger')
+    else toast('Studio pricing saved.', 'success')
   }
 
   const hours = venue === 'cafe' ? cafeHours : studioHours
@@ -118,6 +160,76 @@ export default function AdminScheduleSettings() {
               : <><IonIcon slot="start" icon={saveOutline} />Save {venue === 'cafe' ? 'Cafe' : 'Studio'} Hours</>
             }
           </IonButton>
+
+          {/* Studio-only: session pricing */}
+          {venue === 'studio' && (
+            <>
+              <p className="pricing-section-title">Session Rates (₱ per hour)</p>
+              <div className="hours-table">
+                <div className="hours-row">
+                  <span className="hours-day" style={{ minWidth: 160 }}>Rehearsal</span>
+                  <IonInput
+                    type="number" min="0" step="50"
+                    value={pricing.rehearsal}
+                    onIonInput={e => setPricing(p => ({ ...p, rehearsal: Number(e.detail.value) || 0 }))}
+                    className="hours-input"
+                  />
+                  <span className="hours-separator">/hr</span>
+                </div>
+                <div className="hours-row">
+                  <span className="hours-day" style={{ minWidth: 160 }}>Recording / Mixing</span>
+                  <IonInput
+                    type="number" min="0" step="50"
+                    value={pricing.recording}
+                    onIonInput={e => setPricing(p => ({ ...p, recording: Number(e.detail.value) || 0 }))}
+                    className="hours-input"
+                  />
+                  <span className="hours-separator">/hr</span>
+                </div>
+              </div>
+              <IonButton expand="block" className="settings-save-btn" onClick={savePricing} disabled={savingPricing}>
+                {savingPricing
+                  ? <IonSpinner name="crescent" />
+                  : <><IonIcon slot="start" icon={saveOutline} />Save Studio Pricing</>
+                }
+              </IonButton>
+
+              {/* GCash payment info */}
+              <p className="pricing-section-title">
+                <IonIcon icon={qrCodeOutline} style={{ marginRight:6, verticalAlign:'middle' }} />
+                GCash Payment Info
+              </p>
+              <div className="p7-field">
+                <IonInput label="GCash Number" labelPlacement="stacked" fill="outline"
+                  type="tel" value={gcashNum}
+                  onIonInput={e => setGcashNum(e.detail.value ?? '')}
+                  placeholder="e.g. 09171234567" className="p7-input" />
+              </div>
+              <div className="p7-field">
+                <IonInput label="Account Name" labelPlacement="stacked" fill="outline"
+                  value={gcashName}
+                  onIonInput={e => setGcashName(e.detail.value ?? '')}
+                  placeholder="e.g. Juan Dela Cruz" className="p7-input" />
+              </div>
+              <div className="p7-field">
+                <IonInput label="QR Code Image URL" labelPlacement="stacked" fill="outline"
+                  type="url" value={gcashQrUrl}
+                  onIonInput={e => setGcashQrUrl(e.detail.value ?? '')}
+                  placeholder="https://… (upload to venue-photos and paste URL)"
+                  className="p7-input" />
+              </div>
+              {gcashQrUrl && (
+                <img src={gcashQrUrl} alt="GCash QR preview"
+                  style={{ width:140, height:140, objectFit:'contain', borderRadius:'var(--radius-lg)', border:'1px solid var(--color-outline-variant)', marginBottom:12 }} />
+              )}
+              <IonButton expand="block" className="settings-save-btn" onClick={saveGcash} disabled={savingGcash}>
+                {savingGcash
+                  ? <IonSpinner name="crescent" />
+                  : <><IonIcon slot="start" icon={saveOutline} />Save GCash Info</>
+                }
+              </IonButton>
+            </>
+          )}
         </>
       )}
     </>

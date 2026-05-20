@@ -1,4 +1,5 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSpinner } from '@ionic/react'
+import { IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSpinner } from '@ionic/react'
+import DarkModeToggle from '../components/DarkModeToggle'
 import { useAuth } from '../context/AuthContext'
 import LoginSignUp from '../components/LoginSignUp'
 import ProfileView from '../components/ProfileView'
@@ -11,6 +12,7 @@ export default function AccountPage() {
       <IonHeader>
         <IonToolbar>
           <IonTitle>{session ? 'My Account' : 'Login / Sign Up'}</IonTitle>
+          <IonButtons slot="end"><DarkModeToggle /></IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent>

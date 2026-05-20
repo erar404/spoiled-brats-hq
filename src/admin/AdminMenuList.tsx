@@ -17,7 +17,8 @@ import './AdminPhase7.css'
 const CATEGORIES = ['Coffee & Tea', 'Food & Snacks', 'Desserts', 'Drinks', 'Merchandise', 'Other']
 
 const EMPTY_FORM = {
-  name: '', description: '', price: '', category: '', image_url: '', is_available: true,
+  name: '', description: '', price: '', category: '', image_url: '',
+  is_available: true, is_limited: false, start_date: '', end_date: '',
 }
 
 type FormState = typeof EMPTY_FORM
@@ -62,6 +63,9 @@ export default function AdminMenuList() {
       category:     item.category ?? '',
       image_url:    item.image_url ?? '',
       is_available: item.is_available,
+      is_limited:   item.is_limited,
+      start_date:   item.start_date ?? '',
+      end_date:     item.end_date   ?? '',
     })
     setPreviewUrl(item.image_url ?? '')
     setImageFile(null)
@@ -96,6 +100,9 @@ export default function AdminMenuList() {
       category:     form.category || null,
       image_url:    imageUrl,
       is_available: form.is_available,
+      is_limited:   form.is_limited,
+      start_date:   form.is_limited && form.start_date ? form.start_date : null,
+      end_date:     form.is_limited && form.end_date   ? form.end_date   : null,
     }
 
     let error = null
@@ -152,10 +159,15 @@ export default function AdminMenuList() {
             <div key={item.id}
               className={`menu-card ${!item.is_available ? 'menu-unavailable' : ''}`}
               onClick={() => openEdit(item)}>
-              {item.image_url
-                ? <img src={item.image_url} alt={item.name} className="menu-img" />
-                : <div className="menu-img-placeholder"><IonIcon icon={cafeOutline} /></div>
-              }
+              <div style={{ position:'relative' }}>
+                {item.image_url
+                  ? <img src={item.image_url} alt={item.name} className="menu-img" />
+                  : <div className="menu-img-placeholder"><IonIcon icon={cafeOutline} /></div>
+                }
+                {item.is_limited && (
+                  <span className="menu-limited-badge">LIMITED</span>
+                )}
+              </div>
               <div className="menu-card-body">
                 <p className="menu-card-name">{item.name}</p>
                 <div className="menu-card-bottom">
@@ -232,6 +244,34 @@ export default function AdminMenuList() {
               onIonChange={e => setForm(f => ({ ...f, is_available: e.detail.checked }))}
               color="primary" />
           </div>
+
+          <div className="menu-avail-row">
+            <span className="menu-avail-label">Limited-time item</span>
+            <IonToggle checked={form.is_limited}
+              onIonChange={e => setForm(f => ({
+                ...f, is_limited: e.detail.checked,
+                start_date: e.detail.checked ? f.start_date : '',
+                end_date:   e.detail.checked ? f.end_date   : '',
+              }))}
+              color="secondary" />
+          </div>
+
+          {form.is_limited && (
+            <div className="menu-price-row">
+              <div className="p7-field" style={{ marginBottom:0 }}>
+                <IonInput label="Start Date" labelPlacement="stacked" fill="outline"
+                  type="date" value={form.start_date}
+                  onIonInput={e => setForm(f => ({ ...f, start_date: e.detail.value ?? '' }))}
+                  className="p7-input" />
+              </div>
+              <div className="p7-field" style={{ marginBottom:0 }}>
+                <IonInput label="End Date" labelPlacement="stacked" fill="outline"
+                  type="date" value={form.end_date}
+                  onIonInput={e => setForm(f => ({ ...f, end_date: e.detail.value ?? '' }))}
+                  className="p7-input" />
+              </div>
+            </div>
+          )}
 
           <div className="p7-modal-actions">
             {!isNew && (

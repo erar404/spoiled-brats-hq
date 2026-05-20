@@ -1,0 +1,130 @@
+/* =====================================================
+   ADMIN PROMOTIONS
+   ===================================================== */
+
+.promo-admin-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* ---- Promotion list (admin) ---- */
+.promo-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.promo-admin-card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(45,19,32,0.06);
+  transition: box-shadow 0.15s, transform 0.1s;
+}
+.promo-admin-card:hover {
+  box-shadow: 0 4px 18px rgba(45,19,32,0.10);
+  transform: translateY(-1px);
+}
+.promo-admin-card--inactive { opacity: 0.55; }
+
+.promo-admin-img {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background-size: cover;
+  background-position: center;
+  background-color: var(--color-surface-container-low);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-outline);
+  font-size: 24px;
+}
+
+.promo-admin-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.promo-admin-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+
+.promo-type-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+.promo-type-badge--event     { background: rgba(186,86,36,0.12); color: var(--color-primary); }
+.promo-type-badge--menu_item { background: rgba(254,164,81,0.18); color: #b0700a; }
+.promo-type-badge--others    { background: rgba(104,121,89,0.12); color: var(--color-tertiary); }
+.promo-type-badge--inactive  { background: rgba(138,114,105,0.12); color: var(--color-outline); }
+.promo-type-badge--perm      { background: rgba(104,121,89,0.10); color: var(--color-tertiary); }
+.promo-type-badge--timed     { background: rgba(254,164,81,0.12); color: #b0700a; }
+
+.promo-admin-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promo-admin-date {
+  font-size: 12px;
+  color: var(--color-on-surface-variant);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.promo-admin-date ion-icon { font-size: 12px; flex-shrink: 0; }
+
+/* ---- Modal image ---- */
+.promo-modal-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--color-surface-container-low);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.promo-modal-img:hover .hero-manager-overlay { opacity: 1; }
+
+/* ---- Event calendar note ---- */
+.promo-event-note {
+  font-size: 12px;
+  color: var(--color-on-surface-variant);
+  background: var(--color-surface-container-low);
+  border-radius: var(--radius);
+  padding: 10px 13px;
+  margin: 0 0 4px;
+  line-height: 1.55;
+  font-style: italic;
+}

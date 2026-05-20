@@ -1,5 +1,12 @@
 export type UserRole = 'user' | 'admin'
 export type BookingStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
+export type StudioBookingStatus =
+  | 'for_approval'
+  | 'pending_payment'
+  | 'pending_approval'
+  | 'approved'
+  | 'rejected'
+  | 'cancelled'
 export type BookingType = 'recording' | 'rehearsal'
 
 export interface Database {
@@ -22,6 +29,7 @@ export interface Database {
           google_id: string | null
           phone: string | null
           auth_id: string | null
+          avatar_url: string | null
           created_at: string
         }
         Insert: {
@@ -35,6 +43,7 @@ export interface Database {
           google_id?: string | null
           phone?: string | null
           auth_id?: string | null
+          avatar_url?: string | null
         }
         Update: {
           username?: string
@@ -47,6 +56,7 @@ export interface Database {
           google_id?: string | null
           phone?: string | null
           auth_id?: string | null
+          avatar_url?: string | null
         }
         Relationships: []
       }
@@ -91,7 +101,11 @@ export interface Database {
           start_time: string
           end_time: string
           booking_type: BookingType
-          status: BookingStatus
+          status: StudioBookingStatus
+          admin_price: number | null
+          admin_notes: string | null
+          payment_proof_url: string | null
+          invoice_sent: boolean
           created_at: string
         }
         Insert: {
@@ -101,7 +115,11 @@ export interface Database {
           start_time: string
           end_time: string
           booking_type: BookingType
-          status?: BookingStatus
+          status?: StudioBookingStatus
+          admin_price?: number | null
+          admin_notes?: string | null
+          payment_proof_url?: string | null
+          invoice_sent?: boolean
         }
         Update: {
           user_id?: number | null
@@ -110,7 +128,11 @@ export interface Database {
           start_time?: string
           end_time?: string
           booking_type?: BookingType
-          status?: BookingStatus
+          status?: StudioBookingStatus
+          admin_price?: number | null
+          admin_notes?: string | null
+          payment_proof_url?: string | null
+          invoice_sent?: boolean
         }
         Relationships: []
       }
@@ -123,6 +145,9 @@ export interface Database {
           category: string | null
           image_url: string | null
           is_available: boolean
+          is_limited: boolean
+          start_date: string | null
+          end_date: string | null
           created_at: string
         }
         Insert: {
@@ -132,6 +157,9 @@ export interface Database {
           category?: string | null
           image_url?: string | null
           is_available?: boolean
+          is_limited?: boolean
+          start_date?: string | null
+          end_date?: string | null
         }
         Update: {
           name?: string
@@ -140,6 +168,9 @@ export interface Database {
           category?: string | null
           image_url?: string | null
           is_available?: boolean
+          is_limited?: boolean
+          start_date?: string | null
+          end_date?: string | null
         }
         Relationships: []
       }
@@ -162,12 +193,178 @@ export interface Database {
         }
         Relationships: []
       }
+      cafe_gallery: {
+        Row: {
+          id: string
+          image_url: string
+          caption: string | null
+          alt_text: string | null
+          sort_order: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          image_url: string
+          caption?: string | null
+          alt_text?: string | null
+          sort_order?: number
+          is_active?: boolean
+        }
+        Update: {
+          image_url?: string
+          caption?: string | null
+          alt_text?: string | null
+          sort_order?: number
+          is_active?: boolean
+        }
+        Relationships: []
+      }
+      studio_gallery: {
+        Row: {
+          id: string
+          image_url: string
+          caption: string | null
+          alt_text: string | null
+          sort_order: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          image_url: string
+          caption?: string | null
+          alt_text?: string | null
+          sort_order?: number
+          is_active?: boolean
+        }
+        Update: {
+          image_url?: string
+          caption?: string | null
+          alt_text?: string | null
+          sort_order?: number
+          is_active?: boolean
+        }
+        Relationships: []
+      }
+      cafe_reviews: {
+        Row: {
+          id: string
+          reviewer_name: string
+          reviewer_role: string
+          review_date: string | null
+          review_text: string
+          rating: number
+          sort_order: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          reviewer_name: string
+          reviewer_role?: string
+          review_date?: string | null
+          review_text: string
+          rating?: number
+          sort_order?: number
+          is_active?: boolean
+        }
+        Update: {
+          reviewer_name?: string
+          reviewer_role?: string
+          review_date?: string | null
+          review_text?: string
+          rating?: number
+          sort_order?: number
+          is_active?: boolean
+        }
+        Relationships: []
+      }
+      studio_reviews: {
+        Row: {
+          id: string
+          reviewer_name: string
+          reviewer_role: string
+          review_date: string | null
+          review_text: string
+          rating: number
+          sort_order: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          reviewer_name?: string
+          reviewer_role?: string
+          review_date?: string | null
+          review_text: string
+          rating?: number
+          sort_order?: number
+          is_active?: boolean
+        }
+        Update: {
+          reviewer_name?: string
+          reviewer_role?: string
+          review_date?: string | null
+          review_text?: string
+          rating?: number
+          sort_order?: number
+          is_active?: boolean
+        }
+        Relationships: []
+      }
+      cafe_promos: {
+        Row: {
+          id: string
+          image_url: string
+          title: string
+          description: string | null
+          sort_order: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          image_url: string
+          title: string
+          description?: string | null
+          sort_order?: number
+          is_active?: boolean
+        }
+        Update: {
+          image_url?: string
+          title?: string
+          description?: string | null
+          sort_order?: number
+          is_active?: boolean
+        }
+        Relationships: []
+      }
     }
   }
 }
 
-export type UserRow = Database['public']['Tables']['users']['Row']
-export type CafeScheduleRow = Database['public']['Tables']['cafe_schedule']['Row']
+export type PromotionType = 'event' | 'menu_item' | 'others'
+
+export interface PromotionRow {
+  id: string
+  title: string
+  description: string | null
+  image_url: string | null
+  promotion_type: PromotionType
+  is_permanent: boolean
+  start_date: string | null
+  end_date: string | null
+  event_date: string | null
+  linked_schedule_id: number | null
+  is_active: boolean
+  sort_order: number
+  created_at: string
+}
+
+export type UserRow          = Database['public']['Tables']['users']['Row']
+export type CafeScheduleRow  = Database['public']['Tables']['cafe_schedule']['Row']
 export type StudioScheduleRow = Database['public']['Tables']['studio_schedule']['Row']
-export type CafeMenuRow = Database['public']['Tables']['cafe_menu']['Row']
+// Convenience: studio_schedule.status uses StudioBookingStatus, not BookingStatus
+export type CafeMenuRow      = Database['public']['Tables']['cafe_menu']['Row']
 export type SystemSettingsRow = Database['public']['Tables']['system_settings']['Row']
+export type CafeGalleryRow   = Database['public']['Tables']['cafe_gallery']['Row']
+export type StudioGalleryRow = Database['public']['Tables']['studio_gallery']['Row']
+export type CafeReviewRow    = Database['public']['Tables']['cafe_reviews']['Row']
+export type StudioReviewRow  = Database['public']['Tables']['studio_reviews']['Row']
+export type CafePromoRow     = Database['public']['Tables']['cafe_promos']['Row']

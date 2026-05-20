@@ -4,13 +4,15 @@ import {
   createAnimation, setupIonicReact,
 } from '@ionic/react'
 import { IonReactRouter } from '@ionic/react-router'
-import { cafeOutline, musicalNotesOutline, personCircleOutline, shieldOutline } from 'ionicons/icons'
+import { cafeOutline, homeOutline, musicalNotesOutline, personCircleOutline, shieldOutline } from 'ionicons/icons'
 import { Redirect, Route } from 'react-router-dom'
 
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { DarkModeProvider } from './context/DarkModeContext'
 import AccountPage from './pages/AccountPage'
 import AdminPage from './pages/AdminPage'
 import CafePage from './pages/CafePage'
+import HomePage from './pages/HomePage'
 import StudioPage from './pages/StudioPage'
 
 /* Ionic core CSS */
@@ -27,6 +29,7 @@ import '@ionic/react/css/display.css'
 
 /* Acoustic Brew theme */
 import './theme/variables.css'
+import './theme/dark.css'
 
 // Custom page transition: smooth fade-up slide
 const pageTransition = (baseEl: HTMLElement, opts: { enteringEl: HTMLElement; leavingEl: HTMLElement }) => {
@@ -69,17 +72,21 @@ function AppTabs() {
   return (
     <IonTabs>
       <IonRouterOutlet>
+        <Route exact path="/home" component={HomePage} />
         <Route exact path="/cafe" component={CafePage} />
         <Route exact path="/studio" component={StudioPage} />
         <Route exact path="/account" component={AccountPage} />
         <Route exact path="/admin" component={AdminPage} />
         <Route exact path="/">
-          <Redirect to="/cafe" />
+          <Redirect to="/home" />
         </Route>
       </IonRouterOutlet>
 
       <IonTabBar slot="bottom">
-        {/* Left tabs */}
+        <IonTabButton tab="home" href="/home">
+          <IonIcon icon={homeOutline} />
+          <IonLabel>Home</IonLabel>
+        </IonTabButton>
         <IonTabButton tab="cafe" href="/cafe">
           <IonIcon icon={cafeOutline} />
           <IonLabel>Cafe</IonLabel>
@@ -110,11 +117,13 @@ function AppTabs() {
 export default function App() {
   return (
     <IonApp>
-      <AuthProvider>
-        <IonReactRouter>
-          <AppTabs />
-        </IonReactRouter>
-      </AuthProvider>
+      <DarkModeProvider>
+        <AuthProvider>
+          <IonReactRouter>
+            <AppTabs />
+          </IonReactRouter>
+        </AuthProvider>
+      </DarkModeProvider>
     </IonApp>
   )
 }

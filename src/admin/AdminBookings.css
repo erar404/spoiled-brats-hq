@@ -201,6 +201,16 @@
 }
 .detail-actions ion-button { flex: 1; --border-radius: var(--radius); font-weight: 700; }
 
+.studio-flow-heading {
+  font-family: var(--font-headline);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin: 20px 0 12px;
+}
+
 /* ---- Calendar section ---- */
 .admin-cal-wrap {
   background: #ffffff;

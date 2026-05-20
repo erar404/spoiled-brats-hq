@@ -7,10 +7,63 @@ Full-stack booking website for **Spoiled Brats Cafe** and **Kajon Music Studio**
 - **Design:** Stitch "Spoiled Brats HQ" (Acoustic Brew theme) — project ID `6675066711015401282`
 - **Auth:** Supabase Auth — email/password + Google OAuth + phone OTP
 
+## Deployment (Google Cloud Run)
+
+**Files:** `Dockerfile` (multi-stage Node 20 build → nginx:stable-alpine), `nginx.conf` (SPA fallback, gzip, cache headers), `.dockerignore`
+
+Vite bakes `VITE_*` env vars into the bundle at build time — pass them as `--build-arg`. One image per environment.
+
+### Build & push
+
+```bash
+# Substitute your project ID and region
+PROJECT_ID=your-gcp-project-id
+REGION=asia-southeast1
+IMAGE=gcr.io/$PROJECT_ID/spoiledbratshq
+
+docker build \
+  --build-arg VITE_SUPABASE_URL=https://nhxozevkhypnfueybufj.supabase.co \
+  --build-arg VITE_SUPABASE_ANON_KEY=your-anon-key \
+  --build-arg VITE_EMAILJS_SERVICE_ID=service_xxx \
+  --build-arg VITE_EMAILJS_TEMPLATE_ID=template_xxx \
+  --build-arg VITE_EMAILJS_PUBLIC_KEY=xxx \
+  -t $IMAGE .
+
+docker push $IMAGE
+```
+
+### Deploy to Cloud Run
+
+```bash
+gcloud run deploy spoiledbratshq \
+  --image $IMAGE \
+  --platform managed \
+  --region $REGION \
+  --allow-unauthenticated \
+  --port 8080 \
+  --memory 256Mi \
+  --min-instances 0 \
+  --max-instances 5
+```
+
+### After first deploy — update Supabase settings
+
+1. Copy the Cloud Run service URL (e.g. `https://spoiledbratshq-abc-de.a.run.app`)
+2. Supabase Dashboard → Authentication → URL Configuration:
+   - **Site URL** → set to the Cloud Run URL
+   - **Redirect URLs** → add the Cloud Run URL and `<url>/**`
+3. Google Cloud Console → OAuth Client → add `https://nhxozevkhypnfueybufj.supabase.co/auth/v1/callback` as an authorised redirect URI (already done) — no change needed there
+
+### Health check
+
+Cloud Run startup probe uses `GET /healthz` → nginx returns `200 ok`. No extra config needed; Cloud Run auto-detects the port from `EXPOSE 8080`.
+
 ## Navigation Structure
-- Left tab: Spoiled Brats Cafe
-- Left tab: Kajon Music Studio
-- Right tab: Login / Account Details
+- Home tab (first): Combined HQ landing page (`/home`) — both venues, reviews, contact
+- Left tab: Spoiled Brats Cafe (`/cafe`)
+- Left tab: Kajon Music Studio (`/studio`)
+- Admin tab: Admin panel (`/admin`) — visible to admins only
+- Right tab: Login / Account Details (`/account`)
 
 ## Supabase Tables
 | Table | Purpose |
@@ -23,6 +76,83 @@ Full-stack booking website for **Spoiled Brats Cafe** and **Kajon Music Studio**
 
 ## Storage
 - Bucket: `menu-images` — public bucket for cafe menu item photos
+
+## Configuration
+
+### Content Security Policy (`index.html`)
+```
+font-src 'self' https://fonts.gstatic.com data:
+```
+`data:` is required — Ionic's internal component CSS embeds UI glyphs (IonSelect chevron, IonToggle mark, etc.) as base64 `data:` font URIs. Without it, those elements render broken and the browser logs a CSP violation.
+
+### Supabase RLS — `users` table
+Applied via migration `users_rls_policies`. All four policies are live in `public` schema:
+
+| Policy | Allows |
+|---|---|
+| `users_select` | Own row; admins read all (needed for booking join queries) |
+| `users_insert_own` | Authenticated users create their own profile only |
+| `users_update` | Own row; admins update any user (role changes) |
+| `users_delete_admin` | Admins only |
+
+Helper function `public.is_current_user_admin()` — `SECURITY DEFINER` to avoid RLS recursion when the policy checks the same table. `EXECUTE` revoked from `anon` and `authenticated` so it cannot be called directly via `/rest/v1/rpc`.
+
+### Google OAuth (Supabase Dashboard — manual steps required)
+These cannot be set via SQL or MCP; must be configured in the dashboard.
+
+**Google Cloud Console** (console.cloud.google.com → APIs & Services → Credentials):
+- Create OAuth 2.0 Client ID (type: Web application)
+- Authorized redirect URI: `https://nhxozevkhypnfueybufj.supabase.co/auth/v1/callback`
+- Copy Client ID and Client Secret
+
+**Supabase Dashboard → Authentication → Providers → Google:**
+- Enable Google provider
+- Paste Client ID and Client Secret
+
+**Supabase Dashboard → Authentication → URL Configuration:**
+- Site URL: `http://localhost:3000` (update to production URL on deploy)
+- Redirect URLs (add both):
+  - `http://localhost:3000`
+  - `http://localhost:3000/**`
+  - *(add production URL here when deploying)*
+
+> The dev server runs on port **3000** (`vite.config.ts: server: { port: 3000 }`). `signInWithOAuth` passes `redirectTo: window.location.origin`, so whatever origin the app runs on must be in this list.
+
+### Phone OTP (Supabase Dashboard — manual steps required)
+
+Supabase uses Twilio (or another SMS provider) to send OTPs. It does **not** send SMS out of the box.
+
+**Step 1 — Enable phone auth in Supabase**
+
+Supabase Dashboard → Authentication → Providers → Phone:
+- Toggle **Phone** enabled
+- Leave OTP type as **SMS**
+- Set OTP expiry (e.g. 300 seconds = 5 minutes)
+- Save
+
+**Step 2 — Connect an SMS provider (Twilio recommended)**
+
+Supabase Dashboard → Authentication → Providers → Phone → SMS Provider: **Twilio**
+
+You need a Twilio account (twilio.com):
+1. Create a free account and get a phone number (trial gives one free number)
+2. From the Twilio Console, copy:
+   - **Account SID**
+   - **Auth Token**
+   - **Phone number** (e.g. `+15551234567`)
+3. Paste all three into the Supabase phone provider form and save
+
+**Step 3 — Test**
+- In the app, enter a phone number on the login/sign-up screen and click "Send OTP"
+- You should receive an SMS within a few seconds
+- For local development, Supabase also supports a **test phone number** bypass: Dashboard → Authentication → Settings → scroll to "SMS OTP" → add a test number + fixed OTP code (no real SMS sent)
+
+**Test phone bypass (recommended for dev):**
+- Dashboard → Authentication → Providers → Phone → scroll to "Test phone numbers"
+- Add e.g. `+639000000000` with OTP `123456`
+- Use this number in the app during development without Twilio charges
+
+**Pricing note:** Twilio free trial covers ~$15 USD of SMS. Production usage billed per-message (~$0.0079 USD/SMS outbound US; Philippines rates vary). Alternatively use MessageBird or Vonage — Supabase supports both.
 
 ## Stitch Screens (reference HTML available)
 | Screen | Screen ID |
@@ -131,6 +261,28 @@ Full-stack booking website for **Spoiled Brats Cafe** and **Kajon Music Studio**
 - [x] AdminPage.tsx: all three tabs wired in, no more placeholders
 - [x] TypeScript check: 0 errors
 
+### Phase 9 — Design Polish & Visual Fixes ✅ COMPLETE
+- [x] Removed banned side-stripe `border-left` from `.info-card` → warm surface tint instead
+- [x] Removed banned side-stripe `border-top` + gradient `::before` from `.service-card`
+- [x] Broke identical service card grid: first service uses `.service-card--featured` (full-width horizontal layout)
+- [x] Fixed section spacing collapse: removed `.section + .section { padding-top: 8px }`, bumped base to 48px
+- [x] Fixed review avatar gradient → flat cream bg + burnt orange initial + subtle border
+- [x] Bumped sub-minimum font sizes: `info-label` 10→11px, `service-desc` 11.5→12px, `review-role` 11→12px
+- [x] Fixed footer contrast: `rgba(255,255,255,0.45)` → `0.70` (now ~9:1, passes WCAG AAA)
+- [x] Reordered Cafe page sections: Social moved after CTA (Hero→Gallery→Find Us→Highlights→Reviews→CTA→Social→Footer)
+- [x] Removed misleading `IonRippleEffect` from non-interactive info-cards and review cards
+- [x] Studio gallery now uses `gallery-featured` for first image (consistent with Cafe gallery)
+- [x] Copyright years updated to 2026 in CafePage.tsx and StudioPage.tsx
+
+### Phase 10 — Combined Home Page ✅ COMPLETE
+- [x] `src/pages/HomePage.tsx` + `src/pages/HomePage.css` — new combined landing page
+- [x] Split-photo hero: cafe (left) + studio (right), both Ken Burns animated with offset timing
+- [x] Cafe venue section: warm cream background, logo, tagline, service chips (from `system_settings.cafe_services`), address + phone (tappable), 2 reviews (from `cafe_reviews`), "Book an Event" CTA → `/cafe?tab=bookings`
+- [x] Studio venue section: deep espresso background, same structure, apricot/sage palette, "Book a Session" CTA → `/studio?tab=bookings`
+- [x] Fallback service lists for when `system_settings` is empty
+- [x] App.tsx: `/home` route added as first tab (Home icon); default redirect `/ → /home`
+- [x] TypeScript check: 0 errors
+
 ### Phase 8 — Polish & End-to-End Testing ✅ COMPLETE
 - [x] src/hooks/useToast.tsx — reusable hook returning {toast, ToastEl}; used across all 8 components
 - [x] src/components/Skeletons.tsx — BookingCardSkeleton, BookingListSkeleton, UserListSkeleton, MenuGridSkeleton, MyBookingsSkeleton
@@ -145,3 +297,45 @@ Full-stack booking website for **Spoiled Brats Cafe** and **Kajon Music Studio**
 - [x] AdminScheduleSettings.tsx — toast on save; removed saved state
 - [x] variables.css — font-smoothing (-webkit-font-smoothing: antialiased), smooth scroll, IonToast/IonModal/IonSegment/IonRefresher/IonSkeletonText global polish
 - [x] TypeScript check: 0 errors across all 17 .tsx files
+
+---
+
+## Technical Audit (2026-05-21)
+
+**Score: 13/20 — Acceptable**
+
+| Dimension | Score | Top Finding |
+|---|---|---|
+| Accessibility | 2/4 | No `focus-visible` on custom buttons; `venue-review-role` contrast 4.40:1 fails AA |
+| Performance | 3/4 | Gallery images lack `loading="lazy"`; Ken Burns missing `will-change: transform` |
+| Theming | 2/4 | `#1e1020` not tokenized; `#ffffff` hard-coded in 5 locations vs `var(--color-surface)` |
+| Responsive | 3/4 | `.venue-more-link` touch target ~18px; `.method-btn` ~36px — both below 44px minimum |
+| Anti-Patterns | 3/4 | `© 2024` in `LoginSignUp.tsx`; dead `.bk-msg` CSS; decorative star icons lack `aria-hidden` |
+
+### Open Issues
+
+**P1 — Fix before release**
+- [ ] Add `:focus-visible` outline to `.method-btn`, `.auth-text-link`, `.venue-more-link` (`LoginSignUp.css`, `HomePage.css`)
+- [ ] Fix `venue-review-role` contrast: `rgba(255,255,255,0.42)` → `0.52` on `#1e1020` (`HomePage.css:130`)
+- [ ] `.venue-more-link`: add `min-height: 44px; padding: 10px 4px` (`HomePage.css`)
+- [ ] `.method-btn`: increase to `min-height: 44px` or `padding: 12px 16px` (`LoginSignUp.css`)
+
+**P2 — Fix in next pass**
+- [ ] Add `loading="lazy"` to `.gallery-thumb` images in `CafePage.tsx` and `StudioPage.tsx`
+- [ ] OTP input: change `type="number"` → `type="text" inputMode="numeric" maxLength={6}` (`LoginSignUp.tsx:183`)
+- [ ] Add `aria-pressed={method === 'email'/'phone'}` to method toggle buttons (`LoginSignUp.tsx:137-141`)
+- [ ] Tokenize `#1e1020` → add `--color-surface-inverse` to `variables.css`; reference in `HomePage.css:67`
+- [ ] Replace `background: #ffffff` with `var(--color-surface)` in `CafeBooking.css:52,112,199` and `Skeletons.tsx:10,60`
+- [ ] Verify studio time row (side-by-side inputs) at 320px viewport; add column fallback if needed
+
+**P3 — Polish**
+- [ ] Fix `© 2024` → `2026` in `LoginSignUp.tsx:255`
+- [ ] Delete dead `.bk-msg` CSS block (`CafeBooking.css:82-91`) — replaced by toast in Phase 8
+- [ ] Add `aria-hidden="true"` to decorative star `IonIcon` elements in all review components
+- [ ] Add `aria-hidden="true"` to decorative arrow `IonIcon` in `.venue-more-link` buttons
+- [ ] Add `will-change: transform` to `.hero-bg` (`landing.css`) and `.hq-hero-half` (`HomePage.css`)
+
+### Systemic Gaps (apply to all future components)
+- All custom `<button>` elements need `:focus-visible` styles — add to global base or a shared utility class
+- Touch targets on text-link buttons need `min-height: 44px` as a baseline rule
+- New card backgrounds should use `var(--color-surface)` not `#ffffff` or `#fff`

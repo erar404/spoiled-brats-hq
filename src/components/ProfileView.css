@@ -9,11 +9,30 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
+
+/* Wrapper that holds the avatar (both modes) */
+.profile-avatar-btn {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  background: none;
+}
+.profile-avatar-btn--static {
+  cursor: default;
+}
+
+/* Initials fallback */
 .profile-avatar {
-  width: 80px;
-  height: 80px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   background: var(--color-primary);
   color: #ffffff;
@@ -23,9 +42,49 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 16px rgba(186, 86, 36, 0.3);
+  box-shadow: 0 4px 16px rgba(186, 86, 36, 0.28);
 }
+
+/* Photo */
+.profile-avatar--img {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-container-low);
+  box-shadow: 0 4px 16px rgba(45, 19, 32, 0.15);
+}
+
+/* Camera overlay — visible on hover in edit mode */
+.profile-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(45, 19, 32, 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  color: #ffffff;
+  pointer-events: none;
+}
+.profile-avatar-btn:hover .profile-avatar-overlay,
+.profile-avatar-btn:focus-visible .profile-avatar-overlay {
+  opacity: 1;
+}
+.profile-avatar-overlay ion-icon {
+  font-size: 22px;
+}
+.profile-avatar-overlay span {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .profile-name {
   font-family: var(--font-headline);
   font-size: 24px;
@@ -49,13 +108,13 @@
   text-transform: uppercase;
 }
 
-/* ---- Info card ---- */
+/* ---- Info card (view mode) ---- */
 .profile-info-card {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: 0 2px 12px rgba(45, 19, 32, 0.06);
   padding: 4px 0;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 .profile-info-row {
   display: flex;
@@ -78,6 +137,37 @@
   word-break: break-all;
 }
 
+/* ---- Edit profile trigger ---- */
+.profile-edit-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  background: none;
+  border: 1.5px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 11px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  margin-bottom: 16px;
+  min-height: 44px;
+}
+.profile-edit-trigger:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-surface-container-low);
+}
+.profile-edit-trigger:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.profile-edit-trigger ion-icon { font-size: 17px; }
+
 /* ---- Action buttons ---- */
 .profile-actions {
   display: flex;
@@ -89,7 +179,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1.5px solid var(--color-outline-variant);
   border-radius: var(--radius-lg);
   padding: 14px 20px;
@@ -100,20 +190,23 @@
   cursor: pointer;
   transition: all 0.15s;
   text-align: left;
+  min-height: 44px;
 }
 .profile-action-btn:hover {
   background: var(--color-surface-container-low);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
+.profile-action-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
 .profile-action-btn ion-icon {
   font-size: 20px;
   color: var(--color-primary);
   flex-shrink: 0;
 }
-.profile-action-btn--admin {
-  border-color: var(--color-tertiary);
-}
+.profile-action-btn--admin { border-color: var(--color-tertiary); }
 .profile-action-btn--admin ion-icon { color: var(--color-tertiary); }
 .profile-action-btn--admin:hover {
   background: #f0f4ec;
@@ -126,3 +219,71 @@
   --border-radius: var(--radius);
   font-weight: 600;
 }
+
+/* ---- Edit form ---- */
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-edit-hint {
+  font-size: 13px;
+  color: var(--color-on-surface-variant);
+  text-align: center;
+  margin: -6px 0 2px;
+}
+
+.profile-edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.profile-edit-field { display: flex; flex-direction: column; }
+
+.profile-edit-field--mi { max-width: 120px; }
+
+.profile-edit-input {
+  --background: var(--color-surface);
+  --border-color: var(--color-outline-variant);
+  --border-radius: var(--radius);
+  --highlight-color-focused: var(--color-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+/* ---- Edit actions ---- */
+.profile-edit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.profile-save-btn {
+  --border-radius: var(--radius) !important;
+  font-weight: 700;
+  height: 48px;
+}
+
+.profile-cancel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  padding: 10px;
+  min-height: 44px;
+  border-radius: var(--radius);
+  transition: color 0.15s, background 0.15s;
+}
+.profile-cancel-btn:hover { color: var(--color-on-surface); background: var(--color-surface-container-low); }
+.profile-cancel-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.profile-cancel-btn ion-icon { font-size: 16px; }
