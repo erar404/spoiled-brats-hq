@@ -36,7 +36,7 @@
 .auth-card {
   width: 100%;
   max-width: 460px;
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: var(--radius-xl);
   box-shadow:
     0 4px 6px rgba(45,19,32,0.03),
@@ -118,11 +118,11 @@
 
 /* ---- Google button ---- */
 .google-btn {
-  --border-color: #e0e0e0;
+  --border-color: var(--color-outline-variant);
   --border-width: 1.5px;
   --color: var(--color-on-surface);
-  --background: #ffffff;
-  --background-hover: #f8f8f8;
+  --background: var(--color-surface);
+  --background-hover: var(--color-surface-container-low);
   --border-radius: var(--radius-full);
   font-weight: 600;
   font-size: 14px;
@@ -294,12 +294,17 @@
   font-weight: 700;
   font-size: 15px;
   letter-spacing: 0.02em;
-  height: 50px;
+  height: 52px;
   margin-top: 6px;
   margin-bottom: 10px;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s var(--ease-out-quart), box-shadow 0.15s ease;
 }
-.auth-submit-btn:hover { transform: translateY(-1px); }
+.auth-submit-btn:not([disabled]):hover {
+  transform: translateY(-1px);
+  --box-shadow: 0 6px 20px rgba(186,86,36,0.40);
+}
+.auth-submit-btn:not([disabled]):active { transform: translateY(1px); }
+.auth-submit-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
 
 /* ---- Text links ---- */
 .auth-text-link {
@@ -311,12 +316,18 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  padding: 0;
+  padding: 10px 4px;
+  min-height: 44px;
   text-align: center;
-  margin: 4px auto 0;
+  margin: 0 auto;
   transition: opacity 0.15s;
 }
 .auth-text-link:hover { opacity: 0.75; }
+.auth-text-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
 
 /* ---- Footer ---- */
 .auth-footer-text {

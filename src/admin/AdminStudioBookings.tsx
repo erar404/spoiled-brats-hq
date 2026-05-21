@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   IonBadge, IonButton, IonChip, IonIcon, IonInput,
-  IonLabel, IonList, IonItem, IonModal, IonNote,
+  IonLabel, IonList, IonItem, IonNote,
   IonSegment, IonSegmentButton, IonSpinner, IonTextarea,
 } from '@ionic/react'
+import AppModal from '../components/AppModal'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -19,7 +20,7 @@ import { supabase } from '../lib/supabase'
 import { useToast } from '../hooks/useToast'
 import { BookingListSkeleton } from '../components/Skeletons'
 import { sendPaymentNotification, sendInvoiceEmail } from '../lib/emailService'
-import type { StudioScheduleRow, StudioBookingStatus, BookingType } from '../types/database'
+import type { StudioScheduleRow, StudioBookingStatus, BookingType, BlockedScheduleRow } from '../types/database'
 import './AdminBookings.css'
 import './AdminPhase7.css'
 
@@ -113,25 +114,36 @@ export default function AdminStudioBookings() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const [{ data: sessions }, { data: gcashRow }] = await Promise.all([
+    const [{ data: sessions, error }, { data: gcashRow }, { data: blockData }] = await Promise.all([
       supabase.from('studio_schedule')
         .select('*, users!user_id(username, first_name, last_name, email)')
         .order('created_at', { ascending: false }),
       supabase.from('system_settings').select('value').eq('key', 'gcash_info').single(),
+      supabase.from('blocked_schedules').select('*').eq('venue', 'studio'),
     ])
+    if (error) { setLoading(false); return }
     setSessions((sessions ?? []) as SessionWithUser[])
-    setCalEvents(
-      (sessions ?? [])
-        .filter((r: any) => ['for_approval','pending_payment','pending_approval','approved'].includes(r.status))
-        .map((r: any) => ({
-          id:    String(r.id),
-          title: r.band_artist_name,
-          start: `${r.booking_date}T${r.start_time}`,
-          end:   `${r.booking_date}T${r.end_time}`,
-          backgroundColor: STATUS_COLOR[r.status as StudioBookingStatus],
-          borderColor: 'transparent', textColor: '#ffffff',
-        }))
-    )
+    const sessionEvents: EventInput[] = (sessions ?? [])
+      .filter((r: any) => ['for_approval','pending_payment','pending_approval','approved'].includes(r.status))
+      .map((r: any) => ({
+        id:    String(r.id),
+        title: r.band_artist_name,
+        start: `${r.booking_date}T${r.start_time}`,
+        end:   `${r.booking_date}T${r.end_time}`,
+        backgroundColor: STATUS_COLOR[r.status as StudioBookingStatus],
+        borderColor: 'transparent', textColor: '#ffffff',
+      }))
+    const blockedEvents: EventInput[] = ((blockData ?? []) as BlockedScheduleRow[]).map(r => ({
+      id:    `bl-${r.id}`,
+      title: 'ADMIN BLOCKED SCHED',
+      ...(r.start_time && r.end_time
+        ? { start: `${r.block_date}T${r.start_time}`, end: `${r.block_date}T${r.end_time}` }
+        : { start: `${r.block_date}T00:00:00`, end: `${r.block_date}T23:59:00` }),
+      backgroundColor: '#2d1320',
+      borderColor: '#2d1320',
+      textColor: '#ffffff',
+    }))
+    setCalEvents([...sessionEvents, ...blockedEvents])
     const gv = gcashRow?.value as unknown as GCashInfo | null
     if (gv) setGcash(gv)
     setLoading(false)
@@ -299,9 +311,7 @@ export default function AdminStudioBookings() {
           {list.map(b => (
             <IonItem key={b.id} lines="none" detail={false} onClick={() => openSelected(b)}
               style={{ '--background':'transparent','--padding-start':'0','--inner-padding-end':'0','marginBottom':'8px' }}>
-              <div className="admin-bk-card" style={{
-                width:'100%', borderLeft: `4px solid ${STATUS_COLOR[b.status]}`,
-              }}>
+              <div className={`admin-bk-card admin-bk-card--studio status-${b.status}`} style={{ width:'100%' }}>
                 <div className="admin-bk-icon">
                   <IonIcon icon={b.booking_type === 'recording' ? micOutline : musicalNotesOutline} />
                 </div>
@@ -364,10 +374,14 @@ export default function AdminStudioBookings() {
             <span className="legend-label">{STATUS_LABEL[s]}</span>
           </div>
         ))}
+        <div className="legend-item">
+          <span className="legend-dot" style={{ background: '#2d1320' }} />
+          <span className="legend-label">Admin Blocked</span>
+        </div>
       </div>
 
       {/* ── Detail modal ── */}
-      <IonModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
+      <AppModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
         breakpoints={[0, 0.6, 0.95]} initialBreakpoint={0.92}>
         {selected && (
           <div className="detail-modal-content">
@@ -576,7 +590,7 @@ export default function AdminStudioBookings() {
 
           </div>
         )}
-      </IonModal>
+      </AppModal>
     </>
   )
 }

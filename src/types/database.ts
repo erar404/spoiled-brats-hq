@@ -335,6 +335,35 @@ export interface Database {
         }
         Relationships: []
       }
+      blocked_schedules: {
+        Row: {
+          id: string
+          venue: 'cafe' | 'studio'
+          block_date: string
+          start_time: string | null
+          end_time: string | null
+          reason: string | null
+          created_by: number | null
+          created_at: string
+        }
+        Insert: {
+          venue: 'cafe' | 'studio'
+          block_date: string
+          start_time?: string | null
+          end_time?: string | null
+          reason?: string | null
+          created_by?: number | null
+        }
+        Update: {
+          venue?: 'cafe' | 'studio'
+          block_date?: string
+          start_time?: string | null
+          end_time?: string | null
+          reason?: string | null
+          created_by?: number | null
+        }
+        Relationships: []
+      }
     }
   }
 }
@@ -346,6 +375,7 @@ export interface PromotionRow {
   title: string
   description: string | null
   image_url: string | null
+  photo_urls: string[]
   promotion_type: PromotionType
   is_permanent: boolean
   start_date: string | null
@@ -368,3 +398,16 @@ export type StudioGalleryRow = Database['public']['Tables']['studio_gallery']['R
 export type CafeReviewRow    = Database['public']['Tables']['cafe_reviews']['Row']
 export type StudioReviewRow  = Database['public']['Tables']['studio_reviews']['Row']
 export type CafePromoRow     = Database['public']['Tables']['cafe_promos']['Row']
+
+export type BlockedVenue = 'cafe' | 'studio'
+
+export interface BlockedScheduleRow {
+  id:          string
+  venue:       BlockedVenue
+  block_date:  string
+  start_time:  string | null
+  end_time:    string | null
+  reason:      string | null
+  created_by:  number | null
+  created_at:  string
+}

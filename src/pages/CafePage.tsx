@@ -119,6 +119,7 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
       <section className="hero-section">
         <div className="hero-bg" style={{ backgroundImage: `url('${heroUrl}')` }} />
         <div className="hero-overlay" />
+        <div className="hero-grain" />
         <div className="hero-content cafe-animate">
           <img src="/cafe-logo-transparent.png" alt="Spoiled Brats Cafe" className="hero-logo" />
           <h1 className="hero-tagline">Where Coffee Meets Creativity</h1>
@@ -142,6 +143,7 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
                 src={featured.image_url}
                 alt={featured.alt_text ?? 'Cafe interior'}
                 className="gallery-featured"
+                loading="eager"
               />
             )}
             {thumbs.map(item => (
@@ -150,6 +152,7 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
                 src={item.image_url}
                 alt={item.alt_text ?? 'Cafe interior'}
                 className="gallery-thumb"
+                loading="lazy"
               />
             ))}
           </div>
@@ -239,7 +242,7 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
               <div key={r.id} className="review-card">
                 <div className="review-stars">
                   {Array.from({ length: r.rating }).map((_, s) => (
-                    <IonIcon key={s} icon={star} className="star-icon" />
+                    <IonIcon key={s} icon={star} className="star-icon" aria-hidden="true" />
                   ))}
                 </div>
                 <p className="review-text">"{r.review_text}"</p>

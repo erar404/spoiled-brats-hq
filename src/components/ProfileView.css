@@ -2,6 +2,12 @@
   max-width: 480px;
   margin: 0 auto;
   padding: 32px 16px 48px;
+  animation: fadeInUp 0.4s var(--ease-out-expo) both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ---- Hero ---- */

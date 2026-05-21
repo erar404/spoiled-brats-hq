@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   IonAlert, IonBadge, IonButton, IonChip, IonIcon, IonInput,
-  IonItem, IonLabel, IonList, IonModal, IonNote,
+  IonItem, IonLabel, IonList, IonNote,
   IonRefresher, IonRefresherContent,
   IonSegment, IonSegmentButton, IonSpinner,
 } from '@ionic/react'
+import AppModal from '../components/AppModal'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -21,7 +22,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../hooks/useToast'
 import { MyBookingsSkeleton } from '../components/Skeletons'
-import type { StudioScheduleRow, StudioBookingStatus, BookingType } from '../types/database'
+import type { StudioScheduleRow, StudioBookingStatus, BookingType, BlockedScheduleRow } from '../types/database'
 import './CafeBooking.css'
 import './StudioBooking.css'
 
@@ -109,20 +110,37 @@ export default function StudioBooking() {
   // ── Data loading ─────────────────────────────────────────────────────────────
 
   const loadCal = useCallback(async () => {
-    const { data } = await supabase
-      .from('studio_schedule')
-      .select('id, band_artist_name, booking_date, start_time, end_time, booking_type, status')
-      .in('status', isAdmin
-        ? ['for_approval','pending_payment','pending_approval','approved']
-        : ['approved'])
-    setCalEvents((data ?? []).map((row: any) => ({
-      id:    String(row.id),
+    const [{ data: sessionData }, { data: blockData }] = await Promise.all([
+      supabase
+        .from('studio_schedule')
+        .select('id, band_artist_name, booking_date, start_time, end_time, booking_type, status')
+        .in('status', isAdmin
+          ? ['for_approval','pending_payment','pending_approval','approved']
+          : ['approved']),
+      supabase
+        .from('blocked_schedules')
+        .select('*')
+        .eq('venue', 'studio'),
+    ])
+    const sessionEvents: EventInput[] = (sessionData ?? []).map((row: any) => ({
+      id:    `bk-${row.id}`,
       title: isAdmin ? row.band_artist_name : 'Booked',
       start: `${row.booking_date}T${row.start_time}`,
       end:   `${row.booking_date}T${row.end_time}`,
       backgroundColor: STATUS_COLOR[row.status as StudioBookingStatus] ?? '#8a7269',
       borderColor: 'transparent', textColor: '#ffffff',
-    })))
+    }))
+    const blockedEvents: EventInput[] = ((blockData ?? []) as BlockedScheduleRow[]).map(r => ({
+      id:    `bl-${r.id}`,
+      title: 'ADMIN BLOCKED SCHED',
+      ...(r.start_time && r.end_time
+        ? { start: `${r.block_date}T${r.start_time}`, end: `${r.block_date}T${r.end_time}` }
+        : { start: `${r.block_date}T00:00:00`, end: `${r.block_date}T23:59:00` }),
+      backgroundColor: '#2d1320',
+      borderColor: '#2d1320',
+      textColor: '#ffffff',
+    }))
+    setCalEvents([...sessionEvents, ...blockedEvents])
   }, [isAdmin])
 
   const loadMine = useCallback(async () => {
@@ -173,6 +191,23 @@ export default function StudioBooking() {
     if (!startTime)             return toast('Start time is required.', 'warning')
     if (!endTime)               return toast('End time is required.', 'warning')
     if (startTime >= endTime)   return toast('End time must be after start time.', 'warning')
+
+    // Check for admin blocks on this date
+    const { data: blocks, error: blockErr } = await supabase
+      .from('blocked_schedules')
+      .select('start_time, end_time')
+      .eq('venue', 'studio')
+      .eq('block_date', bookingDate)
+    if (blockErr) {
+      toast('Could not verify time availability. Your request will still be reviewed by the admin.', 'warning')
+    } else if (blocks && blocks.length > 0) {
+      const overlaps = blocks.some(b => {
+        if (!b.start_time || !b.end_time) return true
+        return startTime < b.end_time && endTime > b.start_time
+      })
+      if (overlaps)
+        return toast('This date/time has been blocked by the admin and is unavailable for booking.', 'danger')
+    }
 
     setSubmitting(true)
     const { error } = await supabase.from('studio_schedule').insert({
@@ -262,11 +297,11 @@ export default function StudioBooking() {
     return (
       <div className="booking-login-prompt">
         {ToastEl}
-        <IonIcon icon={personOutline} className="prompt-icon" />
-        <h3>Login Required</h3>
-        <p>You need to be logged in to request a studio session.</p>
+        <IonIcon icon={personOutline} className="prompt-icon" aria-hidden="true" />
+        <h3>Sign in to book studio time</h3>
+        <p>Create a free account to reserve sessions, upload payment proof, and track your bookings.</p>
         <IonButton color="primary" shape="round" onClick={() => history.push('/account')}>
-          Login / Sign Up
+          Sign In or Create Account
         </IonButton>
       </div>
     )
@@ -371,6 +406,10 @@ export default function StudioBooking() {
               <span className="legend-label">{STATUS_LABEL[s]}</span>
             </div>
           ))}
+          <div className="legend-item">
+            <span className="legend-dot" style={{ background: '#2d1320' }} />
+            <span className="legend-label">Admin Blocked</span>
+          </div>
         </div>
       </section>
 
@@ -384,8 +423,8 @@ export default function StudioBooking() {
           <MyBookingsSkeleton count={2} />
         ) : myBookings.length === 0 ? (
           <div className="bk-empty">
-            <IonIcon icon={musicalNotesOutline} />
-            <p>No requests yet. Fill in the form above to get started!</p>
+            <IonIcon icon={musicalNotesOutline} aria-hidden="true" />
+            <p>No sessions booked yet. Pick a date and time above — we'll review and confirm.</p>
           </div>
         ) : (
           <IonList className="my-bk-list" lines="none">
@@ -454,7 +493,7 @@ export default function StudioBooking() {
       </section>
 
       {/* ── Payment Modal ── */}
-      <IonModal isOpen={!!payModalBooking} onDidDismiss={() => setPayModalBooking(null)}
+      <AppModal isOpen={!!payModalBooking} onDidDismiss={() => setPayModalBooking(null)}
         breakpoints={[0, 0.75, 0.95]} initialBreakpoint={0.92}>
         {payModalBooking && (
           <div className="detail-modal-content">
@@ -537,7 +576,7 @@ export default function StudioBooking() {
             </IonButton>
           </div>
         )}
-      </IonModal>
+      </AppModal>
 
       {/* ── Cancel Confirmation Alert ── */}
       <IonAlert

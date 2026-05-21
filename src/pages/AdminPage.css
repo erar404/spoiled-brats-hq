@@ -1,0 +1,109 @@
+/* ── Split-pane (scoped to admin only) ────────────────────────────────────── */
+
+.admin-split-pane {
+  --side-width: 248px;
+  --side-max-width: 248px;
+}
+
+/* Committed dark sidebar — warm espresso, not generic grey */
+ion-menu#admin-menu {
+  --background: var(--color-on-surface);
+  --width: 248px;
+}
+
+ion-menu#admin-menu ion-content {
+  --background: var(--color-on-surface);
+}
+
+ion-menu#admin-menu ion-toolbar {
+  --background: var(--color-primary);
+  --color: var(--color-background);
+  --border-color: transparent;
+}
+
+/* IonTitle inside the menu header */
+ion-menu#admin-menu ion-title {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.01em;
+}
+
+/* ── Side nav list ────────────────────────────────────────────────────────── */
+
+.admin-nav-list {
+  padding: 12px 0 32px;
+  background: transparent;
+}
+
+.admin-nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 248, 0.35);
+  padding: 20px 20px 6px;
+  min-height: 0;
+}
+
+.admin-nav-item {
+  --background: transparent;
+  --background-activated: rgba(186, 86, 36, 0.22);
+  --background-hover: rgba(255, 248, 248, 0.07);
+  --color: rgba(255, 248, 248, 0.65);
+  --padding-start: 20px;
+  --padding-end: 16px;
+  --min-height: 48px;
+  --border-radius: 10px;
+  margin: 1px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.admin-nav-item--active {
+  --background: rgba(186, 86, 36, 0.22);
+  --color: var(--color-background);
+  font-weight: 700;
+}
+
+.admin-nav-item--active .admin-nav-icon {
+  color: var(--color-secondary);
+}
+
+.admin-nav-icon {
+  font-size: 19px;
+  color: inherit;
+}
+
+.admin-nav-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  flex-shrink: 0;
+}
+
+/* ── Main header title ────────────────────────────────────────────────────── */
+
+.admin-page-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-headline);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.admin-title-icon {
+  font-size: 18px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* ── Content padding ──────────────────────────────────────────────────────── */
+
+.admin-panel-body {
+  padding: 24px 20px 0;
+}

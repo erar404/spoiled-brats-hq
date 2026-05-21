@@ -18,7 +18,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../hooks/useToast'
 import { MyBookingsSkeleton } from '../components/Skeletons'
-import type { CafeScheduleRow, BookingStatus } from '../types/database'
+import type { CafeScheduleRow, BookingStatus, BlockedScheduleRow } from '../types/database'
 import './CafeBooking.css'
 
 const STATUS_COLOR: Record<BookingStatus, string> = {
@@ -52,17 +52,33 @@ export default function CafeBooking() {
   const [loadingList,    setLoadingList]     = useState(false)
 
   const loadCal = useCallback(async () => {
-    const { data } = await supabase
-      .from('cafe_schedule')
-      .select('id, event_name, booking_date, status')
-      .in('status', isAdmin ? ['pending', 'approved'] : ['approved'])
-    setCalEvents((data ?? []).map(row => ({
-      id: String(row.id),
+    const [{ data: bookingData }, { data: blockData }] = await Promise.all([
+      supabase
+        .from('cafe_schedule')
+        .select('id, event_name, booking_date, status')
+        .in('status', isAdmin ? ['pending', 'approved'] : ['approved']),
+      supabase
+        .from('blocked_schedules')
+        .select('*')
+        .eq('venue', 'cafe'),
+    ])
+    const bookingEvents: EventInput[] = (bookingData ?? []).map(row => ({
+      id: `bk-${row.id}`,
       title: isAdmin ? row.event_name : 'Booked',
       date: row.booking_date,
       backgroundColor: STATUS_COLOR[row.status as BookingStatus] ?? '#8a7269',
       borderColor: 'transparent', textColor: '#ffffff',
-    })))
+    }))
+    const blockedEvents: EventInput[] = ((blockData ?? []) as BlockedScheduleRow[]).map(r => ({
+      id: `bl-${r.id}`,
+      title: 'ADMIN BLOCKED SCHED',
+      date: r.block_date,
+      allDay: true,
+      backgroundColor: '#2d1320',
+      borderColor: '#2d1320',
+      textColor: '#ffffff',
+    }))
+    setCalEvents([...bookingEvents, ...blockedEvents])
   }, [isAdmin])
 
   const loadMine = useCallback(async () => {
@@ -82,6 +98,18 @@ export default function CafeBooking() {
     if (!bookingDate)         return toast('Booking date is required.', 'warning')
     if (!rentWhole && (!numSeats || Number(numSeats) < 1))
       return toast('Please enter the number of seats.', 'warning')
+
+    // Check admin blocks
+    const { data: blocks, error: blockErr } = await supabase
+      .from('blocked_schedules')
+      .select('id')
+      .eq('venue', 'cafe')
+      .eq('block_date', bookingDate)
+    if (blockErr) {
+      toast('Could not verify date availability. Your request will still be reviewed by the admin.', 'warning')
+    } else if (blocks && blocks.length > 0) {
+      return toast('This date has been blocked by the admin and is unavailable for booking.', 'danger')
+    }
 
     setSubmitting(true)
     const { error } = await supabase.from('cafe_schedule').insert({
@@ -108,11 +136,11 @@ export default function CafeBooking() {
     return (
       <div className="booking-login-prompt">
         {ToastEl}
-        <IonIcon icon={personOutline} className="prompt-icon" />
-        <h3>Login Required</h3>
-        <p>You need to be logged in to request a booking.</p>
+        <IonIcon icon={personOutline} className="prompt-icon" aria-hidden="true" />
+        <h3>Sign in to book a table</h3>
+        <p>Create a free account to request dates, track your bookings, and get confirmation updates.</p>
         <IonButton color="primary" shape="round" onClick={() => history.push('/account')}>
-          Login / Sign Up
+          Sign In or Create Account
         </IonButton>
       </div>
     )
@@ -205,6 +233,10 @@ export default function CafeBooking() {
               <span className="legend-label">{s.charAt(0).toUpperCase() + s.slice(1)}</span>
             </div>
           ))}
+          <div className="legend-item">
+            <span className="legend-dot" style={{ background: '#2d1320' }} />
+            <span className="legend-label">Admin Blocked</span>
+          </div>
         </div>
       </section>
 
@@ -218,8 +250,8 @@ export default function CafeBooking() {
           <MyBookingsSkeleton count={2} />
         ) : myBookings.length === 0 ? (
           <div className="bk-empty">
-            <IonIcon icon={calendarOutline} />
-            <p>No requests yet. Fill in the form above to get started!</p>
+            <IonIcon icon={calendarOutline} aria-hidden="true" />
+            <p>No bookings yet. Choose a date above and we'll confirm within 24 hours.</p>
           </div>
         ) : (
           <IonList className="my-bk-list" lines="none">

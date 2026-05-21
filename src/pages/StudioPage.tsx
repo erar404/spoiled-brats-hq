@@ -137,8 +137,15 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
       <section className="hero-section">
         <div className="hero-bg" style={{ backgroundImage: `url('${heroUrl}')` }} />
         <div className="hero-overlay" />
+        <div className="hero-grain" />
         <div className="hero-content studio-animate">
           <img src="/studio-logo-transparent.png" alt="Kajon Music Studio" className="hero-logo" />
+          {/* EQ bars — unmistakably a music studio */}
+          <div className="studio-hero-eq" aria-hidden="true">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="eq-bar" />
+            ))}
+          </div>
           <h1 className="hero-tagline">Precision. Sound. Soul.</h1>
           <p className="hero-desc">
             A professional sonic environment where creativity meets cutting-edge technology.
@@ -158,16 +165,18 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
             {gallery[0] && (
               <img
                 src={gallery[0].image_url}
-                alt={gallery[0].alt_text ?? 'Studio'}
+                alt={gallery[0].alt_text ?? 'Studio interior'}
                 className="gallery-featured"
+                loading="eager"
               />
             )}
             {gallery.slice(1).map(item => (
               <img
                 key={item.id}
                 src={item.image_url}
-                alt={item.alt_text ?? 'Studio'}
+                alt={item.alt_text ?? 'Studio interior'}
                 className="gallery-thumb"
+                loading="lazy"
               />
             ))}
           </div>
@@ -245,7 +254,7 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
               <div key={r.id} className="review-card">
                 <div className="review-stars">
                   {Array.from({ length: r.rating }).map((_, s) => (
-                    <IonIcon key={s} icon={star} className="star-icon" />
+                    <IonIcon key={s} icon={star} className="star-icon" aria-hidden="true" />
                   ))}
                 </div>
                 <p className="review-text">"{r.review_text}"</p>

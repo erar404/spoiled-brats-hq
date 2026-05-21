@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   IonBadge, IonButton, IonIcon, IonItem, IonItemOption,
-  IonItemOptions, IonItemSliding, IonList, IonModal,
+  IonItemOptions, IonItemSliding, IonList,
   IonRippleEffect, IonSegment, IonSegmentButton, IonLabel, IonSpinner,
 } from '@ionic/react'
+import AppModal from '../components/AppModal'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -16,7 +17,7 @@ import {
 import { supabase } from '../lib/supabase'
 import { useToast } from '../hooks/useToast'
 import { BookingListSkeleton } from '../components/Skeletons'
-import type { CafeScheduleRow, BookingStatus } from '../types/database'
+import type { CafeScheduleRow, BookingStatus, BlockedScheduleRow } from '../types/database'
 import './AdminBookings.css'
 
 const STATUS_COLOR: Record<BookingStatus, string> = {
@@ -60,13 +61,20 @@ export default function AdminCafeBookings() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('cafe_schedule')
-      .select('*, users!user_id(username, first_name, last_name)')
-      .order('created_at', { ascending: false })
+    const [{ data, error }, { data: blockData }] = await Promise.all([
+      supabase
+        .from('cafe_schedule')
+        .select('*, users!user_id(username, first_name, last_name)')
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('blocked_schedules')
+        .select('*')
+        .eq('venue', 'cafe'),
+    ])
+    if (error) { setLoading(false); return }
     const rows = (data ?? []) as BookingWithUser[]
     setBookings(rows)
-    setCalEvents(rows
+    const bookingEvents: EventInput[] = rows
       .filter(r => ['pending', 'approved'].includes(r.status))
       .map(r => ({
         id:    String(r.id),
@@ -76,7 +84,16 @@ export default function AdminCafeBookings() {
         borderColor: 'transparent',
         textColor: '#ffffff',
       }))
-    )
+    const blockedEvents: EventInput[] = ((blockData ?? []) as BlockedScheduleRow[]).map(r => ({
+      id:    `bl-${r.id}`,
+      title: 'ADMIN BLOCKED SCHED',
+      date:  r.block_date,
+      allDay: true,
+      backgroundColor: '#2d1320',
+      borderColor: '#2d1320',
+      textColor: '#ffffff',
+    }))
+    setCalEvents([...bookingEvents, ...blockedEvents])
     setLoading(false)
   }, [])
 
@@ -130,8 +147,8 @@ export default function AdminCafeBookings() {
         <BookingListSkeleton count={4} />
       ) : list.length === 0 ? (
         <div className="admin-empty">
-          <IonIcon icon={cafeOutline} />
-          <p>No {filter === 'all' ? '' : filter} cafe bookings yet.</p>
+          <IonIcon icon={cafeOutline} aria-hidden="true" />
+          <p>{filter === 'all' ? 'No cafe bookings yet.' : `No ${filter} bookings.`}</p>
         </div>
       ) : (
         <IonList lines="none" style={{ background: 'transparent', padding: 0 }}>
@@ -213,10 +230,14 @@ export default function AdminCafeBookings() {
             <span className="legend-label">{s.charAt(0).toUpperCase() + s.slice(1)}</span>
           </div>
         ))}
+        <div className="legend-item">
+          <span className="legend-dot" style={{ background: '#2d1320' }} />
+          <span className="legend-label">Admin Blocked</span>
+        </div>
       </div>
 
       {/* Detail modal */}
-      <IonModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
+      <AppModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
         breakpoints={[0, 0.6, 0.9]} initialBreakpoint={0.6}>
         {selected && (
           <div className="detail-modal-content">
@@ -285,7 +306,7 @@ export default function AdminCafeBookings() {
             </div>
           </div>
         )}
-      </IonModal>
+      </AppModal>
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   IonButtons, IonContent, IonHeader, IonIcon, IonPage,
   IonToolbar, IonTitle, IonButton,
@@ -17,6 +17,52 @@ import './HomePage.css'
 
 const CAFE_SERVICES_FB   = ['Coffee & Beverages', 'Artisan Pastries', 'Private Event Hosting', 'Curated Desserts']
 const STUDIO_SERVICES_FB = ['Multi-Track Recording', 'Live Band Recording', 'Mixing & Mastering', 'Rehearsal Space']
+
+/* ── Character-stagger animated headline ─────────────────────────────────── */
+function AnimatedTagline({ text, className }: { text: string; className?: string }) {
+  const ref = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const chars = Array.from(el.querySelectorAll<HTMLElement>('.hq-char'))
+    chars.forEach((span, i) => {
+      span.animate(
+        [
+          { opacity: '0', transform: 'translateY(18px)' },
+          { opacity: '1', transform: 'translateY(0)' },
+        ],
+        {
+          duration: 520,
+          delay: 280 + i * 42,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'forwards',
+        }
+      )
+    })
+  }, [text])
+
+  return (
+    <h1 className={className} ref={ref} aria-label={text}>
+      {text.split('').map((ch, i) => (
+        <span key={i} className="hq-char" aria-hidden="true">
+          {ch === ' ' ? ' ' : ch}
+        </span>
+      ))}
+    </h1>
+  )
+}
+
+/* ── Animated EQ bars — music venue identity ─────────────────────────────── */
+function EqBars({ variant = 'studio' }: { variant?: 'cafe' | 'studio' }) {
+  return (
+    <div className={`hq-eq-bars hq-eq-bars--${variant}`} aria-hidden="true">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <div key={i} className="eq-bar" />
+      ))}
+    </div>
+  )
+}
 
 export default function HomePage() {
   const history = useHistory()
@@ -98,11 +144,12 @@ export default function HomePage() {
               <div className="hq-hero-half hq-hero-half--alt" style={{ backgroundImage: `url('${studioHero}')` }} />
             </div>
             <div className="hq-hero-veil" />
+            <div className="hero-grain" />
             <div className="hq-hero-content">
               <img src="/cafe-logo-transparent.png" alt="Spoiled Brats HQ" className="hq-hero-logo" />
-              <h1 className="hq-hero-tagline">Two Spaces. One Soul.</h1>
+              <AnimatedTagline text="Two Spaces. One Soul." className="hq-hero-tagline" />
               <p className="hq-hero-desc">
-                A boutique cafe and a professional music studio — crafting moments
+                A boutique cafe and a professional music studio, crafting moments
                 and capturing sound in Quezon City.
               </p>
               <div className="hq-hero-ctas">
@@ -187,9 +234,12 @@ function VenueSection({
     <section className={`venue-section venue-section--${type} home-animate`}>
       <div className="venue-content">
 
+        {/* EQ bars for studio identity */}
+        {type === 'studio' && <EqBars variant="studio" />}
+
         {/* Header */}
         <div className="venue-header">
-          <img src={logo} alt={name} className="venue-logo" />
+          <img src={logo} alt={name} className="venue-logo" loading="lazy" />
           <div>
             <h2 className="venue-name">{name}</h2>
             <p className="venue-tagline">{tagline}</p>
@@ -228,7 +278,7 @@ function VenueSection({
               <div key={r.id} className="venue-review">
                 <div className="venue-review-stars">
                   {Array.from({ length: r.rating }).map((_, i) => (
-                    <IonIcon key={i} icon={star} className="star-icon" />
+                    <IonIcon key={i} icon={star} className="star-icon" aria-hidden="true" />
                   ))}
                 </div>
                 <p className="venue-review-text">"{r.review_text}"</p>

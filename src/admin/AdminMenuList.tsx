@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  IonButton, IonIcon, IonInput, IonModal,
+  IonButton, IonIcon, IonInput,
   IonSelect, IonSelectOption, IonSpinner, IonToggle,
 } from '@ionic/react'
+import AppModal from '../components/AppModal'
 import {
   addOutline, cafeOutline, closeOutline, imageOutline,
   saveOutline, trashOutline,
@@ -89,14 +90,18 @@ export default function AdminMenuList() {
   }
 
   async function save() {
-    if (!form.name.trim()) return
+    if (!form.name.trim()) return toast('Item name is required.', 'warning')
+    const price = parseFloat(form.price)
+    if (isNaN(price) || price < 0) return toast('Please enter a valid price (0 or more).', 'warning')
+    if (form.is_limited && form.start_date && form.end_date && form.start_date > form.end_date)
+      return toast('End date must be on or after the start date.', 'warning')
     setSaving(true)
 
     const imageUrl = await uploadImage()
     const payload = {
       name:         form.name.trim(),
       description:  form.description.trim() || null,
-      price:        parseFloat(form.price) || 0,
+      price:        price,
       category:     form.category || null,
       image_url:    imageUrl,
       is_available: form.is_available,
@@ -161,7 +166,7 @@ export default function AdminMenuList() {
               onClick={() => openEdit(item)}>
               <div style={{ position:'relative' }}>
                 {item.image_url
-                  ? <img src={item.image_url} alt={item.name} className="menu-img" />
+                  ? <img src={item.image_url} alt={item.name} className="menu-img" loading="lazy" />
                   : <div className="menu-img-placeholder"><IonIcon icon={cafeOutline} /></div>
                 }
                 {item.is_limited && (
@@ -181,7 +186,7 @@ export default function AdminMenuList() {
       )}
 
       {/* Add / Edit modal */}
-      <IonModal isOpen={isOpen} onDidDismiss={() => { setSelected(null); setIsNew(false) }}
+      <AppModal isOpen={isOpen} onDidDismiss={() => { setSelected(null); setIsNew(false) }}
         breakpoints={[0, 0.75, 0.95]} initialBreakpoint={0.85}>
         <div className="detail-modal-content">
           <div className="detail-modal-header">
@@ -210,14 +215,14 @@ export default function AdminMenuList() {
           <div className="p7-field">
             <IonInput label="Item Name *" labelPlacement="stacked" fill="outline"
               value={form.name} onIonInput={e => setForm(f => ({ ...f, name: e.detail.value ?? '' }))}
-              placeholder="e.g. Iced White Chocolate Coffee" className="p7-input" />
+              placeholder="e.g. Iced White Chocolate Coffee" maxlength={100} className="p7-input" />
           </div>
 
           <div className="p7-field">
             <IonInput label="Description" labelPlacement="stacked" fill="outline"
               value={form.description}
               onIonInput={e => setForm(f => ({ ...f, description: e.detail.value ?? '' }))}
-              placeholder="Short description…" className="p7-input" />
+              placeholder="Short description…" maxlength={500} className="p7-input" />
           </div>
 
           <div className="menu-price-row">
@@ -284,7 +289,7 @@ export default function AdminMenuList() {
             </IonButton>
           </div>
         </div>
-      </IonModal>
+      </AppModal>
     </>
   )
 }

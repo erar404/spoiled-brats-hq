@@ -105,9 +105,25 @@
   --radius-full: 9999px;
 }
 
+/* ---- Motion tokens ---- */
+:root {
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* ---- Global base styles ---- */
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+/* ---- Reduced-motion: disable all animations for users who need it ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 html {
@@ -148,13 +164,30 @@ ion-skeleton-text {
   --background-rgb: 255, 240, 244;
 }
 
-/* IonModal polish */
+/* IonModal — mobile: bottom sheet with rounded top corners */
 ion-modal {
   --border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 ion-modal::part(backdrop) {
   background: rgba(45, 19, 32, 0.5);
   backdrop-filter: blur(4px);
+}
+
+/* IonModal — desktop: centered dialog */
+@media (min-width: 768px) {
+  ion-modal {
+    --width: min(560px, 94vw);
+    --height: auto;
+    --max-height: 86vh;
+    --border-radius: var(--radius-xl);
+    --box-shadow: 0 24px 64px rgba(45, 19, 32, 0.22);
+  }
+
+  /* Make all modal content containers scrollable on desktop */
+  .detail-modal-content {
+    max-height: 82vh;
+    overflow-y: auto;
+  }
 }
 
 /* Segment base — individual segments use component-specific CSS for borders */
@@ -186,6 +219,17 @@ ion-button {
   font-family: var(--font-body);
   font-weight: 600;
   letter-spacing: 0.02em;
+  transition: transform 0.15s var(--ease-out-quart), box-shadow 0.15s ease;
+}
+
+/* Tabular numbers wherever prices or counts appear */
+.stat-num,
+.studio-cost-amount,
+.studio-rate-price,
+.payment-total-amount,
+.menu-card-price {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 ion-input, ion-textarea, ion-select, ion-datetime {

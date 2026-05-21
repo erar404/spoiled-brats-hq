@@ -134,7 +134,7 @@ export default function ProfileView() {
             aria-label="Change profile photo"
           >
             {displayAvatar
-              ? <img src={displayAvatar} className="profile-avatar profile-avatar--img" alt={fullName} />
+              ? <img src={displayAvatar} className="profile-avatar profile-avatar--img" alt={fullName} loading="lazy" />
               : <div className="profile-avatar">{initials}</div>
             }
             <div className="profile-avatar-overlay">
@@ -145,7 +145,7 @@ export default function ProfileView() {
         ) : (
           <div className="profile-avatar-btn profile-avatar-btn--static">
             {displayAvatar
-              ? <img src={displayAvatar} className="profile-avatar profile-avatar--img" alt={fullName} />
+              ? <img src={displayAvatar} className="profile-avatar profile-avatar--img" alt={fullName} loading="lazy" />
               : <div className="profile-avatar">{initials}</div>
             }
           </div>

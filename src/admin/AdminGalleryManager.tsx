@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  IonButton, IonIcon, IonInput, IonModal,
+  IonButton, IonIcon, IonInput,
   IonSpinner, IonTextarea, IonToggle,
 } from '@ionic/react'
+import AppModal from '../components/AppModal'
 import {
   addOutline, chevronDownOutline, chevronUpOutline,
   closeOutline, eyeOffOutline, eyeOutline,
@@ -344,7 +345,7 @@ export default function AdminGalleryManager({ config }: { config: Config }) {
       )}
 
       {/* Add / Edit modal */}
-      <IonModal isOpen={isOpen} onDidDismiss={closeModal}
+      <AppModal isOpen={isOpen} onDidDismiss={closeModal}
         breakpoints={[0, 0.7, 0.95]} initialBreakpoint={0.85}>
         <div className="detail-modal-content">
           <div className="detail-modal-header">
@@ -427,7 +428,7 @@ export default function AdminGalleryManager({ config }: { config: Config }) {
             </IonButton>
           </div>
         </div>
-      </IonModal>
+      </AppModal>
     </>
   )
 }

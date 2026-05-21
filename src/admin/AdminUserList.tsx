@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  IonButton, IonIcon, IonInput, IonModal,
+  IonButton, IonIcon, IonInput,
   IonSelect, IonSelectOption, IonSpinner,
 } from '@ionic/react'
+import AppModal from '../components/AppModal'
 import {
   chevronForwardOutline, closeOutline, createOutline,
   peopleOutline, searchOutline, shieldCheckmarkOutline,
@@ -38,8 +39,8 @@ export default function AdminUserList() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase.from('users').select('*').order('created_at', { ascending: false })
-    setUsers(data ?? [])
+    const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false })
+    if (!error) setUsers(data ?? [])
     setLoading(false)
   }, [])
 
@@ -55,6 +56,7 @@ export default function AdminUserList() {
 
   async function save() {
     if (!selected) return
+    if (!eUsername.trim()) return toast('Username is required.', 'warning')
     setSaving(true)
     const { error } = await supabase.from('users').update({
       first_name: eFirst.trim() || null,
@@ -133,7 +135,7 @@ export default function AdminUserList() {
       )}
 
       {/* Edit modal */}
-      <IonModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
+      <AppModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
         breakpoints={[0, 0.6, 0.85]} initialBreakpoint={0.6}>
         {selected && (
           <div className="detail-modal-content">
@@ -154,19 +156,19 @@ export default function AdminUserList() {
               <div className="p7-field" style={{ marginBottom:0 }}>
                 <IonInput label="First Name" labelPlacement="stacked" fill="outline"
                   value={eFirst} onIonInput={e => setEFirst(e.detail.value ?? '')}
-                  className="p7-input" />
+                  maxlength={50} className="p7-input" />
               </div>
               <div className="p7-field" style={{ marginBottom:0 }}>
                 <IonInput label="Last Name" labelPlacement="stacked" fill="outline"
                   value={eLast} onIonInput={e => setELast(e.detail.value ?? '')}
-                  className="p7-input" />
+                  maxlength={50} className="p7-input" />
               </div>
             </div>
 
             <div className="p7-field">
               <IonInput label="Username" labelPlacement="stacked" fill="outline"
                 value={eUsername} onIonInput={e => setEUsername(e.detail.value ?? '')}
-                className="p7-input" />
+                maxlength={30} className="p7-input" />
             </div>
 
             <div className="p7-field">
@@ -207,7 +209,7 @@ export default function AdminUserList() {
             </div>
           </div>
         )}
-      </IonModal>
+      </AppModal>
     </>
   )
 }

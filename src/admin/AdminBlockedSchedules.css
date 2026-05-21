@@ -1,0 +1,233 @@
+/* ── Page layout ──────────────────────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.blocked-sched-page {
+  padding-bottom: 40px;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.blocked-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.blocked-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.blocked-header-icon {
+  font-size: 20px;
+  color: var(--color-primary);
+}
+
+.blocked-header-title {
+  font-family: var(--font-headline);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* ── Venue segment ────────────────────────────────────────────────────────── */
+
+.blocked-venue-segment {
+  margin-bottom: 16px;
+  --background: var(--color-surface-container-low);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+/* ── Calendar ─────────────────────────────────────────────────────────────── */
+
+.blocked-cal-wrap {
+  background: var(--color-surface);
+  border-radius: var(--radius, 12px);
+  padding: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+}
+
+/* ── List header ──────────────────────────────────────────────────────────── */
+
+.blocked-list-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  margin-top: 28px;
+  color: var(--color-on-surface);
+}
+
+.blocked-list-header ion-icon {
+  font-size: 18px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.blocked-list-header h3 {
+  font-family: var(--font-headline);
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.blocked-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-background);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 8px;
+  min-width: 22px;
+}
+
+/* ── Empty / loading ──────────────────────────────────────────────────────── */
+
+.blocked-loading {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.blocked-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--color-on-surface-muted, #8a7269);
+}
+
+.blocked-empty ion-icon {
+  font-size: 36px;
+  opacity: .4;
+}
+
+.blocked-empty p {
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+}
+
+/* ── List items ───────────────────────────────────────────────────────────── */
+
+.blocked-list {
+  background: transparent !important;
+  padding: 0;
+}
+
+.blocked-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--color-surface);
+  border-radius: var(--radius, 12px);
+  padding: 14px 12px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  animation: fadeInUp 0.35s var(--ease-out-expo) both;
+  transition: box-shadow 0.15s;
+}
+.blocked-item:hover {
+  box-shadow: 0 3px 14px rgba(0,0,0,.10);
+}
+
+.blocked-item-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-on-surface);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.blocked-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.blocked-item-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0 0 6px;
+}
+
+.blocked-time-chip {
+  --background: rgba(45,19,32,.12);
+  --color: var(--color-on-surface);
+  font-size: 12px;
+  height: 24px;
+  margin: 0 0 4px;
+}
+
+.blocked-allday-chip {
+  --background: rgba(45,19,32,.08);
+  --color: var(--color-on-surface);
+  font-size: 12px;
+  height: 24px;
+  margin: 0 0 4px;
+}
+
+.blocked-item-reason {
+  font-size: 12px;
+  color: var(--color-on-surface-muted, #8a7269);
+  margin: 4px 0 0;
+}
+
+.blocked-del-btn {
+  flex-shrink: 0;
+  min-height: 44px;
+  min-width: 44px;
+}
+.blocked-del-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Modal form ───────────────────────────────────────────────────────────── */
+
+.blocked-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  margin: 0 0 8px;
+}
+
+.blocked-toggle-item {
+  --background: var(--color-surface-container-low);
+  --border-radius: var(--radius, 12px);
+  border-radius: var(--radius, 12px);
+  margin-bottom: 12px;
+}
+
+.blocked-time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.blocked-time-divider {
+  font-size: 20px;
+  color: var(--color-on-surface-muted, #8a7269);
+  flex-shrink: 0;
+  margin-top: 8px;
+}

@@ -139,6 +139,8 @@ export default function LoginSignUp() {
   async function onSendLoginOtp() {
     const phone = buildPhone(areaCode, localNum)
     if (!localNum.trim()) return toast('Please enter your mobile number.', 'warning')
+    if (!/^\d{7,15}$/.test(localNum.replace(/[\s-]/g, '').replace(/^0+/, '')))
+      return toast('Please enter a valid phone number (digits only).', 'warning')
 
     await wrap(async () => {
       const { data: exists, error: rpcErr } = await supabase.rpc(
@@ -168,6 +170,7 @@ export default function LoginSignUp() {
   async function onVerifyLoginOtp() {
     const phone = buildPhone(areaCode, localNum)
     if (!loginOtp.trim()) return toast('Please enter the OTP.', 'warning')
+    if (!/^\d{6}$/.test(loginOtp.trim())) return toast('OTP must be exactly 6 digits.', 'warning')
     await wrap(async () => {
       const err = await verifyPhoneOtp(phone, loginOtp)
       if (err) toast(err, 'danger')
@@ -179,6 +182,10 @@ export default function LoginSignUp() {
   async function onEmailSignUp() {
     if (!suEmail || !suPassword || !suUsername || !suFirstName || !suLastName)
       return toast('Please fill in all fields.', 'warning')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(suEmail.trim()))
+      return toast('Please enter a valid email address.', 'warning')
+    if (!/^[a-zA-Z0-9_]{3,30}$/.test(suUsername.trim()))
+      return toast('Username must be 3-30 characters: letters, numbers, and underscores only.', 'warning')
     if (suPassword !== suConfirm)   return toast('Passwords do not match.', 'warning')
     if (suPassword.length < 6)      return toast('Password must be at least 6 characters.', 'warning')
     await wrap(async () => {
@@ -196,12 +203,16 @@ export default function LoginSignUp() {
   function onPhoneSignupNext() {
     if (!spFirstName.trim() || !spLastName.trim() || !spUsername.trim())
       return toast('Please fill in all fields.', 'warning')
+    if (!/^[a-zA-Z0-9_]{3,30}$/.test(spUsername.trim()))
+      return toast('Username must be 3-30 characters: letters, numbers, and underscores only.', 'warning')
     setSignupPhoneStep('phone')
   }
 
   async function onPhoneSignupSendOtp() {
     const phone = buildPhone(areaCode, localNum)
     if (!localNum.trim()) return toast('Please enter your mobile number.', 'warning')
+    if (!/^\d{7,15}$/.test(localNum.replace(/[\s-]/g, '').replace(/^0+/, '')))
+      return toast('Please enter a valid phone number (digits only).', 'warning')
 
     await wrap(async () => {
       const { data: exists } = await supabase.rpc(
@@ -226,6 +237,7 @@ export default function LoginSignUp() {
   async function onPhoneSignupVerify() {
     const phone = buildPhone(areaCode, localNum)
     if (!spOtp.trim()) return toast('Please enter the OTP.', 'warning')
+    if (!/^\d{6}$/.test(spOtp.trim())) return toast('OTP must be exactly 6 digits.', 'warning')
     await wrap(async () => {
       const err = await verifyPhoneOtp(phone, spOtp)
       if (err) { toast(err, 'danger'); return }
@@ -317,13 +329,13 @@ export default function LoginSignUp() {
               <>
                 <div className="auth-field">
                   <IonInput label="Email Address" labelPlacement="stacked" fill="outline"
-                    type="email" value={email} className="auth-input"
+                    type="email" value={email} className="auth-input" maxlength={254}
                     onIonInput={e => setEmail(e.detail.value ?? '')}
                     placeholder="hello@example.com" />
                 </div>
                 <div className="auth-field">
                   <IonInput label="Password" labelPlacement="stacked" fill="outline"
-                    type="password" value={password} className="auth-input"
+                    type="password" value={password} className="auth-input" maxlength={128}
                     onIonInput={e => setPassword(e.detail.value ?? '')}
                     placeholder="••••••••" />
                 </div>
@@ -399,38 +411,38 @@ export default function LoginSignUp() {
                 <div className="auth-field-row">
                   <div className="auth-field">
                     <IonInput label="First Name" labelPlacement="stacked" fill="outline"
-                      value={suFirstName} className="auth-input"
+                      value={suFirstName} className="auth-input" maxlength={50}
                       onIonInput={e => setSuFirstName(e.detail.value ?? '')}
                       placeholder="Juan" />
                   </div>
                   <div className="auth-field">
                     <IonInput label="Last Name" labelPlacement="stacked" fill="outline"
-                      value={suLastName} className="auth-input"
+                      value={suLastName} className="auth-input" maxlength={50}
                       onIonInput={e => setSuLastName(e.detail.value ?? '')}
                       placeholder="Dela Cruz" />
                   </div>
                 </div>
                 <div className="auth-field">
                   <IonInput label="Username" labelPlacement="stacked" fill="outline"
-                    value={suUsername} className="auth-input"
+                    value={suUsername} className="auth-input" maxlength={30}
                     onIonInput={e => setSuUsername(e.detail.value ?? '')}
                     placeholder="juandelacruz" />
                 </div>
                 <div className="auth-field">
                   <IonInput label="Email Address" labelPlacement="stacked" fill="outline"
-                    type="email" value={suEmail} className="auth-input"
+                    type="email" value={suEmail} className="auth-input" maxlength={254}
                     onIonInput={e => setSuEmail(e.detail.value ?? '')}
                     placeholder="hello@example.com" />
                 </div>
                 <div className="auth-field">
                   <IonInput label="Password" labelPlacement="stacked" fill="outline"
-                    type="password" value={suPassword} className="auth-input"
+                    type="password" value={suPassword} className="auth-input" maxlength={128}
                     onIonInput={e => setSuPassword(e.detail.value ?? '')}
                     placeholder="Min. 6 characters" />
                 </div>
                 <div className="auth-field">
                   <IonInput label="Confirm Password" labelPlacement="stacked" fill="outline"
-                    type="password" value={suConfirm} className="auth-input"
+                    type="password" value={suConfirm} className="auth-input" maxlength={128}
                     onIonInput={e => setSuConfirm(e.detail.value ?? '')}
                     placeholder="••••••••" />
                 </div>
@@ -448,20 +460,20 @@ export default function LoginSignUp() {
                 <div className="auth-field-row">
                   <div className="auth-field">
                     <IonInput label="First Name" labelPlacement="stacked" fill="outline"
-                      value={spFirstName} className="auth-input"
+                      value={spFirstName} className="auth-input" maxlength={50}
                       onIonInput={e => setSpFirstName(e.detail.value ?? '')}
                       placeholder="Juan" />
                   </div>
                   <div className="auth-field">
                     <IonInput label="Last Name" labelPlacement="stacked" fill="outline"
-                      value={spLastName} className="auth-input"
+                      value={spLastName} className="auth-input" maxlength={50}
                       onIonInput={e => setSpLastName(e.detail.value ?? '')}
                       placeholder="Dela Cruz" />
                   </div>
                 </div>
                 <div className="auth-field">
                   <IonInput label="Username" labelPlacement="stacked" fill="outline"
-                    value={spUsername} className="auth-input"
+                    value={spUsername} className="auth-input" maxlength={30}
                     onIonInput={e => setSpUsername(e.detail.value ?? '')}
                     placeholder="juandelacruz" />
                 </div>

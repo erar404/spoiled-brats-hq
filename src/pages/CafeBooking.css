@@ -29,6 +29,10 @@
 /* ---- Page wrapper ---- */
 .booking-page { background: var(--color-background); padding-bottom: 48px; }
 
+@media (min-width: 768px) {
+  .booking-page { max-width: 720px; margin: 0 auto; }
+}
+
 /* ---- Section ---- */
 .booking-section { padding: 24px 20px 0; }
 
@@ -49,10 +53,16 @@
 
 /* ---- Booking form card ---- */
 .booking-card {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: var(--radius-xl);
   padding: 24px 20px;
   box-shadow: 0 4px 24px rgba(45, 19, 32, 0.08);
+  animation: fadeInUp 0.4s var(--ease-out-expo) both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .bk-field { margin-bottom: 16px; }
@@ -96,8 +106,24 @@
   --background: var(--color-primary);
   font-weight: 700;
   font-size: 15px;
-  height: 48px;
+  height: 52px;
   margin-top: 8px;
+  transition: transform 0.15s var(--ease-out-quart), box-shadow 0.15s ease;
+}
+.bk-submit:not([disabled]):hover {
+  transform: translateY(-1px);
+  --box-shadow: 0 6px 20px rgba(186,86,36,0.35);
+}
+.bk-submit:not([disabled]):active { transform: translateY(1px); }
+.bk-submit:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+
+/* Calendar surfaces */
+.cal-wrap {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  box-shadow: 0 4px 24px rgba(45, 19, 32, 0.07);
+  overflow: hidden;
 }
 
 /* ---- Calendar ---- */
@@ -106,13 +132,6 @@
   color: var(--color-on-surface-variant);
   margin: -8px 0 14px;
   line-height: 1.5;
-}
-.cal-wrap {
-  background: #ffffff;
-  border-radius: var(--radius-xl);
-  padding: 16px;
-  box-shadow: 0 4px 24px rgba(45, 19, 32, 0.07);
-  overflow: hidden;
 }
 
 /* FullCalendar overrides */
@@ -196,11 +215,17 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: 16px;
   margin-bottom: 10px;
   box-shadow: 0 2px 12px rgba(45, 19, 32, 0.06);
+  animation: fadeInUp 0.35s var(--ease-out-expo) both;
+  transition: box-shadow 0.2s ease, transform 0.2s var(--ease-out-quart);
+}
+.my-bk-item:hover {
+  box-shadow: 0 6px 20px rgba(45, 19, 32, 0.10);
+  transform: translateY(-1px);
 }
 .my-bk-body { flex: 1; min-width: 0; }
 .my-bk-name {
