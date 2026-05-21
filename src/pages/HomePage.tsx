@@ -5,12 +5,13 @@ import {
   createAnimation, useIonViewDidEnter, useIonViewWillEnter,
 } from '@ionic/react'
 import {
-  locationOutline, callOutline, cafeOutline,
+  locationOutline, callOutline, mailOutline, timeOutline, cafeOutline,
   musicalNotesOutline, arrowForwardOutline, star,
 } from 'ionicons/icons'
 import { useHistory } from 'react-router-dom'
 import DarkModeToggle from '../components/DarkModeToggle'
 import { supabase } from '../lib/supabase'
+import { VENUE_ADDRESS, VENUE_PHONE, VENUE_EMAIL, VENUE_HOURS, VENUE_MAPS_LINK, VENUE_MAPS_EMBED } from '../lib/venueInfo'
 import type { CafeReviewRow, StudioReviewRow } from '../types/database'
 import './landing.css'
 import './HomePage.css'
@@ -175,8 +176,8 @@ export default function HomePage() {
             tagline="Where Coffee Meets Creativity"
             description="A boutique urban retreat crafted for artisans, dreamers, and creatives. Available for private bookings and intimate gatherings."
             services={cafeServices}
-            address="B2 L2 Sampaguita Ave., corner Leonora, Pasong Tamo, Quezon City"
-            phone="+63 912 345 6789"
+            address={VENUE_ADDRESS}
+            phone={VENUE_PHONE}
             reviews={cafeReviews}
             ctaLabel="Book an Event"
             onCta={() => history.push('/cafe?tab=bookings')}
@@ -191,13 +192,78 @@ export default function HomePage() {
             tagline="Precision. Sound. Soul."
             description="A professional sonic environment where creativity meets cutting-edge technology. Built for musicians who refuse to compromise."
             services={studioServices}
-            address="B2 L2 Sampaguita Ave., corner Leonora, Pasong Tamo, Quezon City"
-            phone="+63 912 345 6789"
+            address={VENUE_ADDRESS}
+            phone={VENUE_PHONE}
             reviews={studioReviews}
             ctaLabel="Book a Session"
             onCta={() => history.push('/studio?tab=bookings')}
             onLearnMore={() => history.push('/studio')}
           />
+
+          {/* ── Find Us ── */}
+          <section className="hq-findus home-animate">
+            <div className="hq-findus-inner">
+              {/* Info column */}
+              <div className="hq-findus-info">
+                <h2 className="hq-findus-title">Find Us</h2>
+                <p className="hq-findus-subtitle">
+                  Both the Cafe and Studio share the same address in Quezon City.
+                </p>
+
+                <div className="hq-findus-rows">
+                  <a
+                    href={VENUE_MAPS_LINK}
+                    target="_blank" rel="noreferrer"
+                    className="hq-findus-row"
+                  >
+                    <IonIcon icon={locationOutline} className="hq-findus-icon" />
+                    <div>
+                      <p className="hq-findus-label">Address</p>
+                      <p className="hq-findus-value">{VENUE_ADDRESS}</p>
+                    </div>
+                  </a>
+
+                  <a href={`tel:${VENUE_PHONE.replace(/\s/g, '')}`} className="hq-findus-row">
+                    <IonIcon icon={callOutline} className="hq-findus-icon" />
+                    <div>
+                      <p className="hq-findus-label">Phone</p>
+                      <p className="hq-findus-value">{VENUE_PHONE}</p>
+                    </div>
+                  </a>
+
+                  <a href={`mailto:${VENUE_EMAIL}`} className="hq-findus-row">
+                    <IonIcon icon={mailOutline} className="hq-findus-icon" />
+                    <div>
+                      <p className="hq-findus-label">Email</p>
+                      <p className="hq-findus-value">{VENUE_EMAIL}</p>
+                    </div>
+                  </a>
+
+                  <div className="hq-findus-row">
+                    <IonIcon icon={timeOutline} className="hq-findus-icon" />
+                    <div>
+                      <p className="hq-findus-label">Hours</p>
+                      <p className="hq-findus-value">{VENUE_HOURS}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Map column */}
+              <div className="hq-findus-map">
+                <iframe
+                  title="Spoiled Brats HQ Location"
+                  src={VENUE_MAPS_EMBED}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, display: 'block', minHeight: 280 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            </div>
+          </section>
 
           <footer className="landing-footer">
             <p>© 2026 Spoiled Brats & Kajon. Crafting moments, capturing sound.</p>

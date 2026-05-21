@@ -10,6 +10,7 @@ import {
 } from 'ionicons/icons'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { VENUE_ADDRESS, VENUE_PHONE, VENUE_EMAIL, VENUE_HOURS, VENUE_MAPS_LINK, VENUE_MAPS_EMBED } from '../lib/venueInfo'
 import type { CafeGalleryRow, CafeReviewRow, CafePromoRow } from '../types/database'
 import CafeBooking from './CafeBooking'
 import CafeMenu from './CafeMenu'
@@ -178,34 +179,53 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
       <section className="section cafe-animate">
         <h2 className="section-title">Find Us</h2>
         <div className="info-grid">
-          <div className="info-card">
+          <a
+            href={VENUE_MAPS_LINK}
+            target="_blank" rel="noreferrer"
+            className="info-card"
+            style={{ textDecoration: 'none' }}
+          >
             <IonIcon icon={locationOutline} className="info-icon" />
             <div>
               <p className="info-label">Address</p>
-              <p className="info-value">B2 L2 Sampaguita Ave., corner Leonora, Pasong Tamo, Quezon City</p>
+              <p className="info-value">{VENUE_ADDRESS}</p>
             </div>
-          </div>
-          <div className="info-card">
+          </a>
+          <a href={`tel:${VENUE_PHONE.replace(/\s/g, '')}`} className="info-card" style={{ textDecoration: 'none' }}>
             <IonIcon icon={callOutline} className="info-icon" />
             <div>
               <p className="info-label">Phone</p>
-              <p className="info-value">+63 912 345 6789</p>
+              <p className="info-value">{VENUE_PHONE}</p>
             </div>
-          </div>
-          <div className="info-card">
+          </a>
+          <a href={`mailto:${VENUE_EMAIL}`} className="info-card" style={{ textDecoration: 'none' }}>
             <IonIcon icon={mailOutline} className="info-icon" />
             <div>
               <p className="info-label">Email</p>
-              <p className="info-value">hello@spoiledbratshq.com</p>
+              <p className="info-value">{VENUE_EMAIL}</p>
             </div>
-          </div>
+          </a>
           <div className="info-card">
             <IonIcon icon={timeOutline} className="info-icon" />
             <div>
               <p className="info-label">Hours</p>
-              <p className="info-value">Tuesday – Sunday · 2:00 PM – 10:00 PM</p>
+              <p className="info-value">{VENUE_HOURS}</p>
             </div>
           </div>
+        </div>
+
+        {/* Google Maps embed */}
+        <div className="venue-map-wrap">
+          <iframe
+            title="Spoiled Brats HQ — Cafe Location"
+            src={VENUE_MAPS_EMBED}
+            width="100%"
+            height="260"
+            style={{ border: 0, borderRadius: 'var(--radius-xl)', display: 'block' }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
         </div>
       </section>
 

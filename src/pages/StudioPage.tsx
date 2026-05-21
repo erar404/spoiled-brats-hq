@@ -7,9 +7,11 @@ import {
 import {
   logoInstagram, logoFacebook, musicalNotesOutline,
   micOutline, headsetOutline, layersOutline, radioOutline, star,
+  locationOutline, callOutline, timeOutline,
 } from 'ionicons/icons'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { VENUE_ADDRESS, VENUE_PHONE, VENUE_HOURS, VENUE_MAPS_LINK, VENUE_MAPS_EMBED } from '../lib/venueInfo'
 import type { StudioGalleryRow, StudioReviewRow } from '../types/database'
 import StudioBooking from './StudioBooking'
 import DarkModeToggle from '../components/DarkModeToggle'
@@ -270,6 +272,53 @@ function StudioOverview({ onSchedule }: { onSchedule: () => void }) {
           </div>
         </section>
       )}
+
+      {/* Find Us */}
+      <section className="section studio-animate">
+        <h2 className="section-title">Find Us</h2>
+        <div className="info-grid">
+          <a
+            href={VENUE_MAPS_LINK}
+            target="_blank" rel="noreferrer"
+            className="info-card"
+            style={{ textDecoration: 'none' }}
+          >
+            <IonIcon icon={locationOutline} className="info-icon" />
+            <div>
+              <p className="info-label">Address</p>
+              <p className="info-value">{VENUE_ADDRESS}</p>
+            </div>
+          </a>
+          <a href={`tel:${VENUE_PHONE.replace(/\s/g, '')}`} className="info-card" style={{ textDecoration: 'none' }}>
+            <IonIcon icon={callOutline} className="info-icon" />
+            <div>
+              <p className="info-label">Phone</p>
+              <p className="info-value">{VENUE_PHONE}</p>
+            </div>
+          </a>
+          <div className="info-card">
+            <IonIcon icon={timeOutline} className="info-icon" />
+            <div>
+              <p className="info-label">Hours</p>
+              <p className="info-value">{VENUE_HOURS}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Google Maps embed */}
+        <div className="venue-map-wrap">
+          <iframe
+            title="Kajon Music Studio Location"
+            src={VENUE_MAPS_EMBED}
+            width="100%"
+            height="260"
+            style={{ border: 0, borderRadius: 'var(--radius-xl)', display: 'block' }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+      </section>
 
       {/* CTA */}
       <section className="section cta-section">

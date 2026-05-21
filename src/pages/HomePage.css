@@ -434,6 +434,143 @@
   animation: fadeInUp 0.5s var(--ease-out-expo) both;
 }
 
+/* ── Find Us section ─────────────────────────────────────────────────────── */
+.hq-findus {
+  background: var(--color-on-surface);
+  padding: 48px 0 0;
+  position: relative;
+}
+
+.hq-findus-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Info column */
+.hq-findus-info {
+  padding: 0 26px 36px;
+}
+
+.hq-findus-title {
+  font-family: var(--font-headline);
+  font-size: clamp(26px, 5vw, 38px);
+  font-weight: 700;
+  color: var(--color-background);
+  margin: 0 0 8px;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.hq-findus-subtitle {
+  font-size: 13px;
+  color: rgba(255,248,248,0.55);
+  margin: 0 0 28px;
+  line-height: 1.55;
+}
+
+/* Info rows */
+.hq-findus-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid rgba(255,248,248,0.12);
+}
+
+.hq-findus-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,248,248,0.08);
+  text-decoration: none;
+  transition: opacity 0.15s;
+  cursor: default;
+}
+a.hq-findus-row { cursor: pointer; }
+a.hq-findus-row:hover { opacity: 0.72; }
+
+.hq-findus-icon {
+  font-size: 18px;
+  color: var(--color-secondary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.hq-findus-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--color-secondary);
+  margin: 0 0 3px;
+}
+
+.hq-findus-value {
+  font-size: 13.5px;
+  color: rgba(255,248,248,0.88);
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Map column */
+.hq-findus-map {
+  width: 100%;
+  min-height: 280px;
+  overflow: hidden;
+}
+.hq-findus-map iframe {
+  width: 100%;
+  min-height: 280px;
+  filter: grayscale(15%) contrast(1.05);
+  transition: filter 0.3s ease;
+  display: block;
+}
+.hq-findus-map:hover iframe { filter: none; }
+
+/* Desktop: side-by-side layout */
+@media (min-width: 768px) {
+  .hq-findus-inner {
+    flex-direction: row;
+    min-height: 420px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .hq-findus-info {
+    flex: 1;
+    padding: 52px 52px 52px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .hq-findus-map {
+    flex: 1;
+    min-height: 420px;
+  }
+  .hq-findus-map iframe {
+    min-height: 100%;
+    height: 420px;
+  }
+}
+
+/* Dark mode: background already dark (espresso), just lighten slightly */
+html.dark .hq-findus {
+  background: #0f0a0d;
+}
+html.dark .hq-findus-title { color: #f0e6df; }
+html.dark .hq-findus-rows { border-top-color: rgba(240,230,223,0.10); }
+html.dark .hq-findus-row  { border-bottom-color: rgba(240,230,223,0.06); }
+
+/* Map wrapper: same height as the section on desktop so it fills fully */
+.venue-map-wrap {
+  margin-top: 20px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(45,19,32,0.10);
+}
+html.dark .venue-map-wrap { box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
