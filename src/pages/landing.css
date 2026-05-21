@@ -107,7 +107,7 @@
   to   { transform: scale(1.08); }
 }
 
-/* Ken Burns background layer — animates independently from content */
+/* Ken Burns background layer — photo fallback, shown while video loads */
 .hero-bg {
   position: absolute;
   inset: -6%;
@@ -116,6 +116,21 @@
   z-index: 0;
   animation: heroZoom 20s ease-in-out infinite alternate;
   will-change: transform;
+}
+
+/* Video hero — rendered after .hero-bg in the DOM so it covers the photo
+   when playing, without needing a higher z-index than the overlay.
+   The photo background shows through as a poster while the video buffers. */
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;           /* same plane as .hero-bg; DOM order puts it on top */
+  pointer-events: none;
+  display: block;
 }
 
 .hero-overlay {
@@ -768,7 +783,7 @@
   font-family: var(--font-headline);
   font-size: clamp(24px, 6vw, 34px);
   font-weight: 700;
-  color: var(--color-background);
+  color: #fff8f8; /* fixed cream — CTA bg is always orange in both themes */
   margin: 0 0 10px;
   letter-spacing: -0.02em;
   position: relative;
@@ -786,7 +801,7 @@
   line-height: 1.6;
 }
 .cta-btn {
-  --background: var(--color-background) !important;
+  --background: #fff8f8 !important; /* fixed cream — always on orange surface */
   --color: var(--color-primary) !important;
   --border-radius: var(--radius-full) !important;
   --box-shadow: 0 6px 24px rgba(45,19,32,0.28) !important;

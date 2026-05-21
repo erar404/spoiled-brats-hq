@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  IonBadge, IonButton, IonIcon, IonItem, IonItemOption,
+  IonBadge, IonButton, IonContent, IonIcon, IonItem, IonItemOption,
   IonItemOptions, IonItemSliding, IonList,
   IonRippleEffect, IonSegment, IonSegmentButton, IonLabel, IonSpinner,
 } from '@ionic/react'
@@ -239,8 +239,9 @@ export default function AdminCafeBookings() {
       {/* Detail modal */}
       <AppModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
         breakpoints={[0, 0.6, 0.9]} initialBreakpoint={0.6}>
-        {selected && (
-          <div className="detail-modal-content">
+        <IonContent>
+          {selected && (
+            <div className="detail-modal-content">
             <div className="detail-modal-header">
               <div>
                 <p className="detail-modal-title">{selected.event_name}</p>
@@ -303,9 +304,10 @@ export default function AdminCafeBookings() {
                   <IonIcon slot="start" icon={banOutline} />Cancel
                 </IonButton>
               )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </IonContent>
       </AppModal>
     </>
   )

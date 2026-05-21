@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  IonButton, IonIcon, IonInput,
+  IonButton, IonContent, IonIcon, IonInput,
   IonSpinner, IonTextarea, IonToggle,
 } from '@ionic/react'
 import AppModal from '../components/AppModal'
@@ -347,6 +347,7 @@ export default function AdminGalleryManager({ config }: { config: Config }) {
       {/* Add / Edit modal */}
       <AppModal isOpen={isOpen} onDidDismiss={closeModal}
         breakpoints={[0, 0.7, 0.95]} initialBreakpoint={0.85}>
+        <IonContent>
         <div className="detail-modal-content">
           <div className="detail-modal-header">
             <p className="detail-modal-title">{isNew ? 'Add Photo' : 'Edit Photo'}</p>
@@ -428,6 +429,7 @@ export default function AdminGalleryManager({ config }: { config: Config }) {
             </IonButton>
           </div>
         </div>
+        </IonContent>
       </AppModal>
     </>
   )

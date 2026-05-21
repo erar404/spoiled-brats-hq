@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  IonBadge, IonButton, IonChip, IonIcon, IonInput,
+  IonBadge, IonButton, IonChip, IonContent, IonIcon, IonInput,
   IonLabel, IonList, IonItem, IonNote,
   IonSegment, IonSegmentButton, IonSpinner, IonTextarea,
 } from '@ionic/react'
@@ -383,8 +383,9 @@ export default function AdminStudioBookings() {
       {/* ── Detail modal ── */}
       <AppModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
         breakpoints={[0, 0.6, 0.95]} initialBreakpoint={0.92}>
-        {selected && (
-          <div className="detail-modal-content">
+        <IonContent>
+          {selected && (
+            <div className="detail-modal-content">
             {/* Header */}
             <div className="detail-modal-header">
               <div>
@@ -589,7 +590,8 @@ export default function AdminStudioBookings() {
             )}
 
           </div>
-        )}
+          )}
+        </IonContent>
       </AppModal>
     </>
   )

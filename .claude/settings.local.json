@@ -22,7 +22,9 @@
       "Bash(cat)",
       "Bash(IMPECCABLE_CRITIQUE_META='{\"target\":\"CafePage + StudioPage landing pages\",\"total_score\":23,\"p0_count\":0,\"p1_count\":3}' node \"C:\\\\Users\\\\Arellano\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\critique-storage.mjs\" write src-pages-cafepage-studiopage-landing /tmp/critique-body.md)",
       "Bash(npx tsc *)",
-      "mcp__supabase__get_advisors"
+      "mcp__supabase__get_advisors",
+      "Bash(dir \"C:\\\\Users\\\\Arellano\\\\ERA\\\\Coding\\\\spoiledbratshq\\\\static\" /b)",
+      "Bash(findstr /i \"cafe-hero\")"
     ]
   },
   "enableAllProjectMcpServers": true,

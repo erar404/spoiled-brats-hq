@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  IonButton, IonIcon, IonInput,
+  IonButton, IonContent, IonIcon, IonInput,
   IonSelect, IonSelectOption, IonSpinner,
 } from '@ionic/react'
 import AppModal from '../components/AppModal'
@@ -137,8 +137,9 @@ export default function AdminUserList() {
       {/* Edit modal */}
       <AppModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
         breakpoints={[0, 0.6, 0.85]} initialBreakpoint={0.6}>
-        {selected && (
-          <div className="detail-modal-content">
+        <IonContent>
+          {selected && (
+            <div className="detail-modal-content">
             <div className="detail-modal-header">
               <div>
                 <p className="detail-modal-title">Edit User</p>
@@ -207,8 +208,9 @@ export default function AdminUserList() {
                 {saving ? <IonSpinner name="crescent" /> : <><IonIcon slot="start" icon={createOutline} />Save Changes</>}
               </IonButton>
             </div>
-          </div>
-        )}
+            </div>
+          )}
+        </IonContent>
       </AppModal>
     </>
   )

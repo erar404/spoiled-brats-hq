@@ -376,3 +376,204 @@ html.dark .cal-wrap .fc-theme-standard th {
 }
 html.dark .cal-wrap .fc-timegrid-slot-label-cushion { color: #b8a098 !important; }
 html.dark .cal-wrap .fc-timegrid-axis-cushion { color: #b8a098 !important; }
+
+/* ── Admin sidebar (always dark — deepen in dark mode) ── */
+html.dark ion-menu#admin-menu,
+html.dark ion-menu#admin-menu ion-content {
+  --background: #100710;
+}
+
+/* ── Admin sidebar nav items ── */
+html.dark .admin-nav-section-label { color: rgba(240,230,223,0.28); }
+
+/* ── Admin stat cards ── */
+html.dark .admin-stat-card {
+  background: #1e1118;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+}
+html.dark .admin-stat-card.stat-pending   { background: rgba(254,164,81,0.10); }
+html.dark .admin-stat-card.stat-approved  { background: rgba(104,121,89,0.10); }
+html.dark .admin-stat-card.stat-rejected  { background: rgba(186,26,26,0.10); }
+html.dark .admin-stat-card.stat-cancelled { background: rgba(138,114,105,0.08); }
+
+/* ── Admin booking cards ── */
+html.dark .admin-bk-card {
+  background: #1e1118;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+html.dark .admin-bk-card.status-pending         { background: rgba(254,164,81,0.10); }
+html.dark .admin-bk-card.status-approved        { background: rgba(104,121,89,0.10); }
+html.dark .admin-bk-card.status-rejected        { background: rgba(186,26,26,0.08); }
+html.dark .admin-bk-card.status-cancelled       { background: rgba(138,114,105,0.08); }
+html.dark .admin-bk-card.status-for_approval    { background: rgba(91,141,217,0.10); }
+html.dark .admin-bk-card.status-pending_payment { background: rgba(254,164,81,0.10); }
+html.dark .admin-bk-card.status-pending_approval{ background: rgba(193,127,36,0.10); }
+html.dark .admin-bk-name { color: #f0e6df; }
+html.dark .admin-bk-meta { color: #b8a098; }
+
+/* ── Admin section header ── */
+html.dark .admin-section-header { border-bottom-color: #3d2a2e; }
+html.dark .admin-section-header h3 { color: #f0e6df; }
+
+/* ── Admin filter segment ── */
+html.dark .admin-filter-segment ion-segment-button {
+  --color: #b8a098;
+  --color-checked: #0f0a0d;
+  --background-checked: #f0e6df;
+}
+html.dark .settings-venue-segment ion-segment-button {
+  --color: #b8a098;
+  --color-checked: #0f0a0d;
+  --background-checked: #f0e6df;
+}
+
+/* ── Admin detail modal ── */
+html.dark .detail-modal-title { color: #f0e6df; }
+html.dark .detail-key { color: #7a6560; }
+html.dark .detail-val { color: #f0e6df; }
+html.dark .detail-row { border-bottom-color: #2d1a24; }
+
+/* ── Admin blocked schedules ── */
+html.dark .blocked-item {
+  background: #1e1118;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+html.dark .blocked-item-date { color: #f0e6df; }
+html.dark .blocked-time-chip { --background: rgba(240,230,223,0.10); --color: #f0e6df; }
+html.dark .blocked-allday-chip { --background: rgba(240,230,223,0.08); --color: #f0e6df; }
+html.dark .blocked-item-reason { color: #7a6560; }
+html.dark .blocked-count { background: #e87040; color: #fff8f8; }
+html.dark .blocked-header-title { color: #f0e6df; }
+html.dark .blocked-list-header { color: #f0e6df; border-bottom-color: #3d2a2e; }
+
+/* ── Booking form inputs ── */
+html.dark .bk-input {
+  --background: #2d1a24;
+  --border-color: #3d2a2e;
+  --color: #f0e6df;
+}
+html.dark .booking-card { background: #1e1118; }
+html.dark .bk-toggle-item { --background: #2d1a24; }
+html.dark .booking-section-header .bsh-title { color: #f0e6df; }
+html.dark .my-bk-name { color: #f0e6df; }
+html.dark .my-bk-meta { color: #b8a098; }
+html.dark .my-bk-details { color: #7a6560; }
+html.dark .bk-empty { color: #7a6560; }
+html.dark .booking-login-prompt h3 { color: #f0e6df; }
+html.dark .booking-login-prompt p  { color: #b8a098; }
+html.dark .cal-wrap .fc-day-today { background: #180d13 !important; }
+
+/* ── Studio booking ── */
+html.dark .studio-cost-estimate { background: #2d1a24; }
+html.dark .studio-cost-label    { color: #b8a098; }
+html.dark .studio-proof-sent {
+  color: #fea451;
+  background: rgba(254,164,81,0.12);
+}
+html.dark .studio-hours-note-item ion-note { color: #7a6560; }
+html.dark .payment-summary { background: #2d1a24; }
+html.dark .payment-summary-row { color: #b8a098; }
+html.dark .payment-summary-total { color: #f0e6df; border-top-color: #3d2a2e; }
+html.dark .payment-gcash-title { color: #f0e6df; }
+html.dark .payment-gcash-label { color: #b8a098; }
+html.dark .payment-gcash-value { color: #f0e6df; }
+html.dark .payment-gcash-info  { border-bottom-color: #3d2a2e; }
+html.dark .payment-qr-placeholder { border-color: #3d2a2e; color: #7a6560; }
+html.dark .payment-proof-upload { background-color: #2d1a24; border-color: #3d2a2e; }
+html.dark .payment-proof-hint { color: #7a6560; }
+
+/* ── ProfileView ── */
+html.dark .profile-avatar-overlay { background: rgba(15,10,13,0.65); }
+/* Green skill badge → adapt */
+html.dark .profile-avatar--initials-bg { background: #2d1a24; }
+
+/* ── CafeMenu ── */
+html.dark .cafe-menu-card { background: #1e1118; }
+
+/* ── Admin promotions ── */
+html.dark .promo-admin-toolbar .gallery-count { color: #b8a098; }
+html.dark .promo-type-badge--menu_item { color: #fea451; }
+html.dark .promo-type-badge--timed     { color: #fea451; }
+html.dark .promo-admin-title { color: #f0e6df; }
+html.dark .promo-admin-date  { color: #b8a098; }
+html.dark .promo-photos-empty-text { color: #b8a098; }
+html.dark .promo-photos-empty-hint { color: #6d5550; }
+html.dark .promo-photos-section {
+  border-color: #3d2a2e;
+}
+html.dark .promo-photos-section--drag {
+  border-color: #e87040;
+  background: rgba(232,112,64,0.07);
+}
+html.dark .promo-photo-add-slot {
+  border-color: #3d2a2e;
+  color: #6d5550;
+}
+html.dark .promo-photo-add-slot:hover {
+  border-color: #e87040;
+  color: #e87040;
+}
+html.dark .promo-form-label { color: #f0e6df; }
+html.dark .blocked-toggle-item, html.dark .promo-modal-content .menu-avail-row {
+  border-color: #3d2a2e;
+}
+
+/* ── Admin gallery ── */
+html.dark .gallery-card-badge {
+  background: rgba(15,10,13,0.75);
+  color: rgba(240,230,223,0.85);
+}
+
+/* ── Admin promotions photo section note ── */
+html.dark .promo-event-note {
+  background: rgba(232,112,64,0.08);
+  border-color: rgba(232,112,64,0.20);
+  color: #b8a098;
+}
+
+/* ── Studio rate card (additional fix for dark tint) ── */
+html.dark .studio-rate-card { background: #1e1118; }
+html.dark .studio-rate-label { color: #b8a098; }
+html.dark .studio-rate-price { color: #e87040; }
+html.dark .studio-rate-price span { color: #6d5550; }
+
+/* ── Landing page section label ── */
+html.dark .section-label { color: #e87040; }
+html.dark .section-label::after { background: #3d2a2e; }
+
+/* ── Landing page promo badge ── */
+html.dark .promo-list-badge--ongoing { background: rgba(138,158,114,0.15); color: #8a9e72; }
+html.dark .promo-list-badge--limited { background: rgba(232,112,64,0.15); color: #e87040; }
+
+/* ── Admin menu modal (p7 modal fields) ── */
+html.dark .menu-modal-img-wrap { background: #2d1a24; border-color: #3d2a2e; }
+html.dark .menu-img-upload-hint { color: #7a6560; }
+html.dark .menu-avail-label { color: #f0e6df; }
+html.dark .hours-row { background: #1e1118; box-shadow: 0 1px 6px rgba(0,0,0,0.3); }
+html.dark .hours-day { color: #f0e6df; }
+html.dark .hours-separator { color: #6d5550; }
+html.dark .hours-input { --background: #2d1a24; }
+html.dark .settings-save-btn { --background: #e87040; }
+html.dark .pricing-section-title { color: #f0e6df; }
+
+/* ── Admin promotions modal (p7) ── */
+html.dark .p7-field .p7-input { --background: #2d1a24; --border-color: #3d2a2e; }
+html.dark .promo-modal-title { color: #f0e6df; }
+html.dark .promo-modal-desc  { color: #b8a098; }
+html.dark .promo-modal-meta  { border-top-color: #3d2a2e; }
+html.dark .promo-modal-meta-label { color: #7a6560; }
+html.dark .promo-modal-meta-value { color: #f0e6df; }
+html.dark .promo-modal-badge--ongoing {
+  background: rgba(138,158,114,0.15);
+  color: #8a9e72;
+}
+html.dark .promo-modal-body { background: #1e1118; }
+
+/* ── Profile avatar overlay fix ── */
+html.dark .profile-name { color: #f0e6df; }
+html.dark .profile-username { color: #b8a098; }
+html.dark .profile-member-since { color: #6d5550; }
+
+/* ── Home page: cafe venue section in dark mode ── */
+html.dark .venue-section--cafe .venue-tagline { color: #e87040; }
+

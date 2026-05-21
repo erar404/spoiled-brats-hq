@@ -173,20 +173,35 @@ ion-modal::part(backdrop) {
   backdrop-filter: blur(4px);
 }
 
-/* IonModal — desktop: centered dialog */
+/* IonModal — desktop: centered dialog
+ *
+ * Root cause of invisible modals: Ionic's modal shadow DOM creates a wrapper
+ * div whose height is driven by the --height CSS custom property. With
+ * breakpoints removed (AppModal), the default is --height: 100% which fills
+ * the viewport. Setting --height: auto is not enough because the wrapper's
+ * child (.ion-page) is absolutely positioned, so auto resolves to 0.
+ *
+ * Fix: give the modal an explicit height so the wrapper always has real
+ * dimensions. IonContent handles internal scrolling within that height.
+ */
 @media (min-width: 768px) {
   ion-modal {
     --width: min(560px, 94vw);
-    --height: auto;
-    --max-height: 86vh;
+    --height: 85vh;
     --border-radius: var(--radius-xl);
     --box-shadow: 0 24px 64px rgba(45, 19, 32, 0.22);
   }
 
-  /* Make all modal content containers scrollable on desktop */
+  /* IonContent fills the modal and scrolls */
+  ion-modal ion-content {
+    --overflow: auto;
+  }
+
+  /* Plain div content (no IonContent): full height + scroll */
   .detail-modal-content {
-    max-height: 82vh;
+    height: 100%;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

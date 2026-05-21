@@ -5,14 +5,14 @@
   --side-max-width: 248px;
 }
 
-/* Committed dark sidebar — warm espresso, not generic grey */
+/* Committed dark sidebar — fixed espresso, intentionally dark in both themes */
 ion-menu#admin-menu {
-  --background: var(--color-on-surface);
+  --background: #2d1320;
   --width: 248px;
 }
 
 ion-menu#admin-menu ion-content {
-  --background: var(--color-on-surface);
+  --background: #2d1320;
 }
 
 ion-menu#admin-menu ion-toolbar {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  IonAlert, IonBadge, IonButton, IonChip, IonIcon, IonInput,
+  IonAlert, IonBadge, IonButton, IonChip, IonContent, IonIcon, IonInput,
   IonItem, IonLabel, IonList, IonNote,
   IonRefresher, IonRefresherContent,
   IonSegment, IonSegmentButton, IonSpinner,
@@ -495,8 +495,9 @@ export default function StudioBooking() {
       {/* ── Payment Modal ── */}
       <AppModal isOpen={!!payModalBooking} onDidDismiss={() => setPayModalBooking(null)}
         breakpoints={[0, 0.75, 0.95]} initialBreakpoint={0.92}>
-        {payModalBooking && (
-          <div className="detail-modal-content">
+        <IonContent>
+          {payModalBooking && (
+            <div className="detail-modal-content">
             <div className="detail-modal-header">
               <p className="detail-modal-title">Complete Payment</p>
               <IonButton fill="clear" onClick={() => setPayModalBooking(null)}>
@@ -574,8 +575,9 @@ export default function StudioBooking() {
               onClick={submitProof} disabled={uploading || !proofFile}>
               {uploading ? <IonSpinner name="crescent" /> : <><IonIcon slot="start" icon={sendOutline} />Submit Payment Proof</>}
             </IonButton>
-          </div>
-        )}
+            </div>
+          )}
+        </IonContent>
       </AppModal>
 
       {/* ── Cancel Confirmation Alert ── */}

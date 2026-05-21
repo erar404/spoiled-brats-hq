@@ -117,6 +117,22 @@ function CafeOverview({ onSchedule }: { onSchedule: () => void }) {
 
       {/* Hero */}
       <section className="hero-section">
+        {/* Video hero — drop cafe-hero.webm + cafe-hero.mp4 into /static/ to activate */}
+        <video
+          className="hero-video"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          poster={heroUrl}
+          aria-hidden="true"
+        >
+          <source src="/cafe-hero.webm" type="video/webm" />
+          <source src="/cafe-hero.mp4"  type="video/mp4" />
+          {/* Falls back to the photo background below if video is unsupported */}
+        </video>
+        {/* Photo background — shown while video loads or if no video file exists */}
         <div className="hero-bg" style={{ backgroundImage: `url('${heroUrl}')` }} />
         <div className="hero-overlay" />
         <div className="hero-grain" />

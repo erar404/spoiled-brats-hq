@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { IonButton, IonContent, IonIcon } from '@ionic/react'
 import AppModal from '../components/AppModal'
 import {
   calendarOutline, chevronBackOutline, chevronForwardOutline,
-  closeOutline, imagesOutline, pricetagOutline, sparklesOutline,
+  closeOutline, pricetagOutline, sparklesOutline,
 } from 'ionicons/icons'
 import { supabase } from '../lib/supabase'
 import type { PromotionRow, PromotionType } from '../types/database'
@@ -11,12 +11,9 @@ import './PromotionsSection.css'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const SLIDE_DURATION = 5000   // ms per slide when promo has one photo
-const PHOTO_DURATION = 2500   // ms per slide when promo has multiple photos
+const PHOTO_DURATION = 2800   // ms each photo shows in the inner slideshow
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-type Slide = { promo: PromotionRow; src: string }
 
 function isActiveNow(p: PromotionRow): boolean {
   if (!p.is_active) return false
@@ -40,43 +37,46 @@ function getPhotos(p: PromotionRow): string[] {
 }
 
 const TYPE_META: Record<PromotionType, { label: string; icon: string; color: string }> = {
-  event:     { label: 'Event',     icon: calendarOutline,  color: 'var(--color-primary)' },
-  menu_item: { label: 'Menu Item', icon: pricetagOutline,  color: 'var(--color-secondary)' },
-  others:    { label: 'Promo',     icon: sparklesOutline,  color: 'var(--color-tertiary)' },
+  event:     { label: 'Event',     icon: calendarOutline, color: 'var(--color-primary)' },
+  menu_item: { label: 'Menu Item', icon: pricetagOutline, color: 'var(--color-secondary)' },
+  others:    { label: 'Promo',     icon: sparklesOutline, color: 'var(--color-tertiary)' },
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
+//
+// Two-tier architecture:
+//   Outer  — promoIdx:  navigated manually via prev/next buttons
+//   Inner  — photoIdx:  auto-advances through photos of the current promo
+//
+// The caption is keyed by curPromo.id so it re-animates only on promo changes,
+// staying stable while photos cycle within the same promo.
 
 export default function PromotionsSection() {
-  const [promos,   setPromos]  = useState<PromotionRow[]>([])
-  const [loading,  setLoading] = useState(true)
-  const [slideIdx, setSlideIdx] = useState(0)
-  const [prevSrc,  setPrevSrc] = useState('')
-  const [paused,   setPaused]  = useState(false)
-  const [selected, setSelected] = useState<PromotionRow | null>(null)
-  const [modalPhoto, setModalPhoto] = useState(0)
+  const [promos,      setPromos]      = useState<PromotionRow[]>([])
+  const [loading,     setLoading]     = useState(true)
+  const [promoIdx,    setPromoIdx]    = useState(0)
+  const [photoIdx,    setPhotoIdx]    = useState(0)
+  const [prevSrc,     setPrevSrc]     = useState('')
+  const [isPhotoTx,   setIsPhotoTx]   = useState(false)
+  const [captionKey,  setCaptionKey]  = useState(0)
+  const [progressKey, setProgressKey] = useState(0)
+  const [paused,      setPaused]      = useState(false)
+  const [selected,    setSelected]    = useState<PromotionRow | null>(null)
+  const [modalPhoto,  setModalPhoto]  = useState(0)
 
-  // Stable refs so the interval callback never captures stale state
-  const slideIdxRef  = useRef(0)
-  const slidesRef    = useRef<Slide[]>([])
-  const pausedRef    = useRef(false)
-  slideIdxRef.current = slideIdx
+  // Refs let the interval callback read the latest state without stale closures
+  const promoIdxRef = useRef(0)
+  const photoIdxRef = useRef(0)
+  const promosRef   = useRef<PromotionRow[]>([])
+  const pausedRef   = useRef(false)
+  promoIdxRef.current = promoIdx
+  photoIdxRef.current = photoIdx
+  promosRef.current   = promos
   pausedRef.current   = paused
 
-  // ── Flat slide list ─────────────────────────────────────────────────────────
-  // One entry per photo per promo. Enables seamless per-photo cycling.
+  // ── Data ──────────────────────────────────────────────────────────────────────
 
-  const slides = useMemo<Slide[]>(() =>
-    promos.flatMap(p =>
-      getPhotos(p).map(src => ({ promo: p, src }))
-    )
-  , [promos])
-  slidesRef.current = slides
-
-  const count = slides.length
-  const cur   = slides[slideIdx] ?? slides[0]
-
-  // ── Data fetch ───────────────────────────────────────────────────────────────
+  const len = promos.length
 
   useEffect(() => {
     supabase
@@ -92,84 +92,75 @@ export default function PromotionsSection() {
       })
   }, [])
 
-  // ── Timer ─────────────────────────────────────────────────────────────────────
-  // Uses a ref-based callback so it never needs to be re-created on every render.
-  // The interval duration is computed fresh on every tick from the refs.
-
-  const tickRef = useRef<() => void>(() => {})
-
-  tickRef.current = () => {
-    if (pausedRef.current) return
-    const all  = slidesRef.current
-    if (all.length <= 1) return
-    const idx  = slideIdxRef.current
-    const next = (idx + 1) % all.length
-    setPrevSrc(all[idx].src)
-    setSlideIdx(next)
-  }
+  // ── Inner auto-advance (photos within current promo) ─────────────────────────
+  //
+  // The effect restarts whenever promoIdx or len changes:
+  //   • promoIdx change → new promo has its own photos, reset the cycle
+  //   • len change (data loaded) → start the first cycle
+  //
+  // pausedRef is checked inside the tick so the interval doesn't need to restart
+  // just because the user hovered (no stale closure on pause state).
 
   useEffect(() => {
-    if (count <= 1) return
-    // Duration for current slide: shorter when cycling within a multi-photo promo
-    const multiPhoto = (cur?.promo.photo_urls?.length ?? 1) > 1
-    const dur = multiPhoto ? PHOTO_DURATION : SLIDE_DURATION
+    if (len === 0) return
+    const photos = getPhotos(promosRef.current[promoIdxRef.current] ?? promosRef.current[0])
+    if (photos.length <= 1) return  // single photo promo: nothing to cycle
 
-    const timer = setInterval(() => tickRef.current(), dur)
+    const timer = setInterval(() => {
+      if (pausedRef.current) return  // skip tick while hovered; keep interval alive
+
+      const currentPhotos = getPhotos(promosRef.current[promoIdxRef.current])
+      const oldIdx = photoIdxRef.current
+      const oldSrc = currentPhotos[oldIdx] ?? ''
+      const nextIdx = (oldIdx + 1) % currentPhotos.length
+
+      setPrevSrc(oldSrc)
+      setPhotoIdx(nextIdx)
+      setIsPhotoTx(true)
+      setProgressKey(k => k + 1)
+    }, PHOTO_DURATION)
+
     return () => clearInterval(timer)
-    // Re-create the interval whenever the current slide changes (new promo may
-    // have a different duration) or when the slide count changes on data load.
-  }, [slideIdx, count, cur?.promo.id])
+  }, [promoIdx, len])  // NOT photoIdx — interval must not restart on every tick
 
-  // ── Navigation ───────────────────────────────────────────────────────────────
+  // ── Outer navigation (per-promo) ─────────────────────────────────────────────
 
-  function goTo(idx: number) {
-    if (!count) return
-    const target = ((idx % count) + count) % count
-    setPrevSrc(slides[slideIdx]?.src ?? '')
-    setSlideIdx(target)
+  function goToPromo(nextPi: number) {
+    if (len === 0) return
+    const target = ((nextPi % len) + len) % len
+    const currentPhotos = getPhotos(promosRef.current[promoIdxRef.current])
+    const oldSrc = currentPhotos[photoIdxRef.current] ?? ''
+
+    setPrevSrc(oldSrc)
+    setIsPhotoTx(false)   // promo change → scale+fade transition
+    setPromoIdx(target)
+    setPhotoIdx(0)        // inner resets to photo 0 of new promo
+    setCaptionKey(k => k + 1)
+    setProgressKey(k => k + 1)
   }
 
-  function goPrev(e?: React.MouseEvent) {
-    e?.stopPropagation()
-    goTo(slideIdx - 1)
-  }
-
-  function goNext(e?: React.MouseEvent) {
-    e?.stopPropagation()
-    goTo(slideIdx + 1)
-  }
+  function goPrev(e?: React.MouseEvent) { e?.stopPropagation(); goToPromo(promoIdxRef.current - 1) }
+  function goNext(e?: React.MouseEvent) { e?.stopPropagation(); goToPromo(promoIdxRef.current + 1) }
 
   // ── Modal ─────────────────────────────────────────────────────────────────────
 
-  function openModal() { setSelected(cur?.promo ?? null); setModalPhoto(0) }
+  function openModal()  { setSelected(curPromo); setModalPhoto(0) }
   function closeModal() { setSelected(null) }
 
-  // ── Derived values ────────────────────────────────────────────────────────────
+  // ── Render guard ──────────────────────────────────────────────────────────────
 
-  if (loading || promos.length === 0) return null
+  if (loading || len === 0) return null
 
-  // Is this a within-promo photo change (same promo, just next photo)?
-  const prevSlide   = slides.find(s => s.src === prevSrc)
-  const isPhotoOnly = !!prevSlide && prevSlide.promo.id === cur?.promo.id
-
-  // Caption key: changes only when the promo changes — caption animations restart
-  const captionKey  = cur?.promo.id ?? ''
-
-  // Duration for the progress bar (matches the interval duration above)
-  const multiPhoto  = (cur?.promo.photo_urls?.length ?? 1) > 1
-  const progressMs  = multiPhoto ? PHOTO_DURATION : SLIDE_DURATION
-
-  const meta        = TYPE_META[cur.promo.promotion_type]
-
-  // Unique promos list for dot navigation
-  const uniquePromos = promos
-  const activePromoIdx = uniquePromos.findIndex(p => p.id === cur?.promo.id)
+  const curPromo  = promos[promoIdx]
+  const curPhotos = getPhotos(curPromo)
+  const activeSrc = curPhotos[photoIdx] ?? ''
+  const meta      = TYPE_META[curPromo.promotion_type]
 
   return (
     <section className="section promo-slideshow-section cafe-animate">
       <h2 className="section-title">Promotions</h2>
 
-      {/* ── Slide frame ── */}
+      {/* ── Outer: slide frame ────────────────────────────────────────────────── */}
       <div
         className="promo-slide"
         onMouseEnter={() => setPaused(true)}
@@ -177,11 +168,11 @@ export default function PromotionsSection() {
         onClick={openModal}
         role="button"
         tabIndex={0}
-        aria-label={`View details: ${cur.promo.title}`}
+        aria-label={`View details: ${curPromo.title}`}
         onKeyDown={e => e.key === 'Enter' && openModal()}
       >
-        {/* Outgoing image */}
-        {prevSrc && prevSrc !== cur.src && (
+        {/* Outgoing background */}
+        {prevSrc && prevSrc !== activeSrc && (
           <div
             key={`out-${prevSrc}`}
             className="promo-slide-bg promo-slide-bg--out"
@@ -189,95 +180,89 @@ export default function PromotionsSection() {
           />
         )}
 
-        {/* Incoming image */}
+        {/* Incoming background
+            promo change  → scale+fade (promo-slide-bg--in)
+            photo change  → pure crossfade (promo-slide-bg--in-photo) */}
         <div
-          key={`in-${cur.src}`}
-          className={`promo-slide-bg ${isPhotoOnly ? 'promo-slide-bg--in-photo' : 'promo-slide-bg--in'}`}
-          style={{ backgroundImage: `url('${cur.src}')` }}
+          key={`in-${activeSrc}`}
+          className={`promo-slide-bg ${isPhotoTx ? 'promo-slide-bg--in-photo' : 'promo-slide-bg--in'}`}
+          style={{ backgroundImage: `url('${activeSrc}')` }}
         />
 
-        {/* Veil */}
+        {/* Gradient veil */}
         <div className="promo-slide-veil" />
 
-        {/* Caption — re-mounts only when the promo changes */}
-        <div className="promo-slide-caption" key={captionKey}>
+        {/* Caption — keyed by promo id: re-animates on promo change only */}
+        <div className="promo-slide-caption" key={`caption-${captionKey}`}>
           <span className="promo-caption-type" style={{ color: meta.color }}>
             <IonIcon icon={meta.icon} aria-hidden="true" />
             {meta.label}
           </span>
-          <h3 className="promo-caption-title">{cur.promo.title}</h3>
-          {cur.promo.description && (
-            <p className="promo-caption-desc">{cur.promo.description}</p>
+          <h3 className="promo-caption-title">{curPromo.title}</h3>
+          {curPromo.description && (
+            <p className="promo-caption-desc">{curPromo.description}</p>
           )}
           <div className="promo-caption-meta">
-            {cur.promo.promotion_type === 'event' && cur.promo.event_date && (
+            {curPromo.promotion_type === 'event' && curPromo.event_date && (
               <span className="promo-caption-date">
                 <IonIcon icon={calendarOutline} aria-hidden="true" />
-                {fmtDate(cur.promo.event_date, { month: 'short', day: 'numeric', year: 'numeric' })}
+                {fmtDate(curPromo.event_date, { month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
             )}
-            {cur.promo.is_permanent && (
+            {curPromo.is_permanent && (
               <span className="promo-caption-badge promo-caption-badge--ongoing">Ongoing</span>
             )}
-            {!cur.promo.is_permanent && cur.promo.end_date && (
+            {!curPromo.is_permanent && curPromo.end_date && (
               <span className="promo-caption-badge promo-caption-badge--limited">
-                Until {fmtDate(cur.promo.end_date, { month: 'short', day: 'numeric' })}
+                Until {fmtDate(curPromo.end_date, { month: 'short', day: 'numeric' })}
               </span>
             )}
           </div>
           <span className="promo-caption-tap-hint">Tap to see full details</span>
         </div>
 
-        {/* Within-promo photo position dots */}
-        {(cur.promo.photo_urls?.length ?? 0) > 1 && (() => {
-          const photos    = getPhotos(cur.promo)
-          const photoPos  = photos.indexOf(cur.src)
-          return (
-            <div className="promo-inner-dots" aria-hidden="true">
-              {photos.map((_, i) => (
-                <span
-                  key={i}
-                  className={`promo-inner-dot${i === photoPos ? ' promo-inner-dot--active' : ''}`}
-                />
-              ))}
-            </div>
-          )
-        })()}
+        {/* Inner: photo position dots — visible when promo has multiple photos */}
+        {curPhotos.length > 1 && (
+          <div className="promo-inner-dots" aria-hidden="true">
+            {curPhotos.map((_, i) => (
+              <span
+                key={i}
+                className={`promo-inner-dot${i === photoIdx ? ' promo-inner-dot--active' : ''}`}
+              />
+            ))}
+          </div>
+        )}
 
-        {/* Progress bar */}
-        {!paused && (
+        {/* Inner: progress bar for current photo (only when cycling) */}
+        {curPhotos.length > 1 && !paused && (
           <div
             className="promo-slide-progress"
-            key={`p-${slideIdx}`}
-            style={{ animationDuration: `${progressMs}ms` }}
+            key={`progress-${progressKey}`}
+            style={{ animationDuration: `${PHOTO_DURATION}ms` }}
           />
         )}
       </div>
 
-      {/* ── Controls row: prev / dots / next ── */}
+      {/* ── Outer: prev / dots / next ─────────────────────────────────────────── */}
       <div className="promo-controls">
         <button
           className="promo-ctrl-btn"
           onClick={goPrev}
           aria-label="Previous promotion"
-          disabled={count <= 1}
+          disabled={len <= 1}
         >
           <IonIcon icon={chevronBackOutline} />
         </button>
 
-        {/* Promo-level dot indicators */}
         <div className="promo-slide-dots" role="tablist" aria-label="Promotion slides">
-          {uniquePromos.map((p, i) => (
+          {promos.map((p, i) => (
             <button
               key={p.id}
               role="tab"
-              aria-selected={i === activePromoIdx}
-              aria-label={`${p.title}`}
-              className={`promo-dot${i === activePromoIdx ? ' promo-dot--active' : ''}`}
-              onClick={() => {
-                const firstSlide = slides.findIndex(s => s.promo.id === p.id)
-                if (firstSlide !== -1) goTo(firstSlide)
-              }}
+              aria-selected={i === promoIdx}
+              aria-label={p.title}
+              className={`promo-dot${i === promoIdx ? ' promo-dot--active' : ''}`}
+              onClick={e => { e.stopPropagation(); goToPromo(i) }}
             />
           ))}
         </div>
@@ -286,13 +271,13 @@ export default function PromotionsSection() {
           className="promo-ctrl-btn"
           onClick={goNext}
           aria-label="Next promotion"
-          disabled={count <= 1}
+          disabled={len <= 1}
         >
           <IonIcon icon={chevronForwardOutline} />
         </button>
       </div>
 
-      {/* ── Detail modal ── */}
+      {/* ── Detail modal ──────────────────────────────────────────────────────── */}
       <AppModal
         isOpen={!!selected}
         onDidDismiss={closeModal}
@@ -308,7 +293,7 @@ export default function PromotionsSection() {
                 {/* Photo gallery */}
                 <div className="promo-modal-gallery">
                   <div
-                    key={`modal-${modalPhoto}`}
+                    key={`modal-photo-${modalPhoto}`}
                     className="promo-modal-photo"
                     style={{ backgroundImage: `url('${photos[modalPhoto] ?? ''}')` }}
                   />

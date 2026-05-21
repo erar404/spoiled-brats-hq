@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  IonButton, IonChip, IonIcon, IonInput, IonItem,
+  IonButton, IonChip, IonContent, IonIcon, IonInput, IonItem,
   IonLabel, IonList, IonNote, IonSegment,
   IonSegmentButton, IonSpinner, IonTextarea, IonToggle,
 } from '@ionic/react'
@@ -232,6 +232,7 @@ export default function AdminBlockedSchedules() {
       {/* Add Modal */}
       <AppModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}
         breakpoints={[0, 0.85, 1]} initialBreakpoint={0.85}>
+        <IonContent>
         <div className="detail-modal-content">
           <div className="detail-modal-header">
             <p className="detail-modal-title">Block a Date / Time</p>
@@ -317,6 +318,7 @@ export default function AdminBlockedSchedules() {
               : <><IonIcon slot="start" icon={banOutline} />Block This Schedule</>}
           </IonButton>
         </div>
+        </IonContent>
       </AppModal>
     </div>
   )

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  IonButton, IonIcon, IonInput,
+  IonButton, IonContent, IonIcon, IonInput,
   IonSelect, IonSelectOption, IonSpinner, IonToggle,
 } from '@ionic/react'
 import AppModal from '../components/AppModal'
@@ -188,6 +188,7 @@ export default function AdminMenuList() {
       {/* Add / Edit modal */}
       <AppModal isOpen={isOpen} onDidDismiss={() => { setSelected(null); setIsNew(false) }}
         breakpoints={[0, 0.75, 0.95]} initialBreakpoint={0.85}>
+        <IonContent>
         <div className="detail-modal-content">
           <div className="detail-modal-header">
             <p className="detail-modal-title">{isNew ? 'Add Menu Item' : 'Edit Menu Item'}</p>
@@ -289,6 +290,7 @@ export default function AdminMenuList() {
             </IonButton>
           </div>
         </div>
+        </IonContent>
       </AppModal>
     </>
   )
