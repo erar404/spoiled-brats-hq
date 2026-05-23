@@ -277,3 +277,28 @@
 .badge-approved  { --background: #687959; --color: #ffffff; }
 .badge-rejected  { --background: #ba1a1a; --color: #ffffff; }
 .badge-cancelled { --background: #8a7269; --color: #ffffff; }
+
+/* ---- Date conflict notice ---- */
+.date-conflict-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+.date-conflict-notice ion-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.date-conflict-notice p { margin: 0; }
+.date-conflict-notice--exclusive {
+  background: rgba(186, 86, 36, 0.09);
+  border: 1px solid rgba(186, 86, 36, 0.22);
+  color: #ba5624;
+}
+.date-conflict-notice--open {
+  background: rgba(91, 141, 217, 0.09);
+  border: 1px solid rgba(91, 141, 217, 0.22);
+  color: #5b8dd9;
+}
+

@@ -6,7 +6,7 @@ import {
 import { useState } from 'react'
 import {
   banOutline, cafeOutline, cameraOutline, imagesOutline,
-  musicalNotesOutline, peopleOutline, pricetagOutline,
+  mailOutline, musicalNotesOutline, peopleOutline, pricetagOutline,
   restaurantOutline, settingsOutline,
 } from 'ionicons/icons'
 import { AdminRoute } from '../components/ProtectedRoute'
@@ -19,9 +19,10 @@ import AdminScheduleSettings from '../admin/AdminScheduleSettings'
 import { AdminPhotosTab } from '../admin/AdminGalleryManager'
 import AdminPromotions from '../admin/AdminPromotions'
 import AdminBlockedSchedules from '../admin/AdminBlockedSchedules'
+import AdminEmailSettings from '../admin/AdminEmailSettings'
 import './AdminPage.css'
 
-type AdminTab = 'cafe-bookings' | 'studio-bookings' | 'users' | 'menu' | 'photos' | 'promotions' | 'blocked' | 'settings'
+type AdminTab = 'cafe-bookings' | 'studio-bookings' | 'users' | 'menu' | 'photos' | 'promotions' | 'blocked' | 'settings' | 'email'
 
 const NAV_ITEMS: { value: AdminTab; label: string; icon: string }[] = [
   { value: 'cafe-bookings',   label: 'Cafe Bookings',   icon: cafeOutline },
@@ -32,6 +33,7 @@ const NAV_ITEMS: { value: AdminTab; label: string; icon: string }[] = [
   { value: 'promotions',      label: 'Promotions',      icon: pricetagOutline },
   { value: 'blocked',         label: 'Blocked Dates',   icon: banOutline },
   { value: 'settings',        label: 'Settings',        icon: settingsOutline },
+  { value: 'email',           label: 'Email',           icon: mailOutline },
 ]
 
 const MENU_ID = 'admin-menu'
@@ -97,6 +99,7 @@ function AdminDashboard() {
             {tab === 'promotions'      && <AdminPromotions />}
             {tab === 'blocked'         && <AdminBlockedSchedules />}
             {tab === 'settings'        && <AdminScheduleSettings />}
+            {tab === 'email'           && <AdminEmailSettings />}
           </div>
         </IonContent>
       </IonPage>

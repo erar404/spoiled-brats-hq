@@ -12,6 +12,7 @@ import { DarkModeProvider } from './context/DarkModeContext'
 import AccountPage from './pages/AccountPage'
 import AdminPage from './pages/AdminPage'
 import CafePage from './pages/CafePage'
+import EmailConfirmedModal from './components/EmailConfirmedModal'
 import HomePage from './pages/HomePage'
 import StudioPage from './pages/StudioPage'
 
@@ -121,6 +122,7 @@ export default function App() {
         <AuthProvider>
           <IonReactRouter>
             <AppTabs />
+            <EmailConfirmedModal />
           </IonReactRouter>
         </AuthProvider>
       </DarkModeProvider>

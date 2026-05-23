@@ -1,0 +1,148 @@
+/* ── Admin Email Settings ────────────────────────────────────────────────────── */
+
+.aes-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Status banner ── */
+.aes-status-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+}
+.aes-status-banner ion-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.aes-status-banner--ok {
+  background: rgba(104, 121, 89, 0.10);
+  border-color: rgba(104, 121, 89, 0.25);
+  color: #687959;
+}
+.aes-status-banner--warn {
+  background: rgba(186, 86, 36, 0.08);
+  border-color: rgba(186, 86, 36, 0.22);
+  color: #ba5624;
+}
+.aes-status-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 3px;
+}
+.aes-status-sub {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* ── Form section ── */
+.aes-section {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(45,19,32,0.05);
+}
+.aes-section-title {
+  font-family: var(--font-headline);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0 0 6px;
+}
+.aes-section-desc {
+  font-size: 13px;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 20px;
+  line-height: 1.55;
+}
+
+.aes-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 90px;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+@media (max-width: 400px) {
+  .aes-row-2 { grid-template-columns: 1fr; }
+}
+
+/* Password field with eye toggle */
+.aes-pass-wrap {
+  position: relative;
+}
+.aes-eye-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-on-surface-variant);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  z-index: 2;
+}
+.aes-eye-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  border-radius: 4px;
+}
+
+/* Actions row */
+.aes-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.aes-test-note {
+  font-size: 12px;
+  color: var(--color-on-surface-variant);
+  margin: 8px 0 0;
+}
+
+/* ── Help section ── */
+.aes-help {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(45,19,32,0.05);
+}
+.aes-steps {
+  color: var(--color-on-surface);
+  font-size: 14px;
+  line-height: 1.75;
+  margin: 12px 0 16px;
+  padding-left: 22px;
+}
+.aes-steps li { margin-bottom: 4px; }
+
+.aes-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(254,164,81,0.10);
+  border: 1px solid rgba(254,164,81,0.30);
+  border-radius: var(--radius);
+  color: #8a5a00;
+}
+.aes-tip ion-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #c17f24;
+}
+.aes-tip p {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}

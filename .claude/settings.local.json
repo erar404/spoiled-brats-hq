@@ -24,7 +24,8 @@
       "Bash(npx tsc *)",
       "mcp__supabase__get_advisors",
       "Bash(dir \"C:\\\\Users\\\\Arellano\\\\ERA\\\\Coding\\\\spoiledbratshq\\\\static\" /b)",
-      "Bash(findstr /i \"cafe-hero\")"
+      "Bash(findstr /i \"cafe-hero\")",
+      "mcp__supabase__deploy_edge_function"
     ]
   },
   "enableAllProjectMcpServers": true,

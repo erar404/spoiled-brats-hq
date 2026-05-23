@@ -303,6 +303,62 @@
 .legend-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 .legend-label { font-size: 11px; color: var(--color-on-surface-variant); font-weight: 500; }
 
+/* ---- Admin bookings page header ---- */
+.admin-bk-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.admin-bk-page-title {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+/* ---- Admin event card tint ---- */
+.admin-bk-card.admin-event-card {
+  background: rgba(186, 86, 36, 0.06);
+  border: 1px solid rgba(186, 86, 36, 0.18);
+}
+.admin-bk-card.admin-event-card:hover {
+  background: rgba(186, 86, 36, 0.10);
+}
+
+/* ---- Exclusive-event notice (in add modal) ---- */
+.admin-event-excl-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(186, 86, 36, 0.08);
+  border: 1px solid rgba(186, 86, 36, 0.2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: #ba5624;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+.admin-event-excl-notice ion-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+.admin-event-excl-notice p { margin: 0; line-height: 1.45; }
+
+/* ---- Invoice modal (full-width on all breakpoints) ---- */
+.invoice-modal {
+  --width: 100%;
+  --height: 100%;
+  --border-radius: 0;
+  --box-shadow: none;
+}
+@media (min-width: 768px) {
+  .invoice-modal {
+    --width: min(920px, 96vw);
+    --height: 96vh;
+    --border-radius: 10px;
+  }
+}
+
 /* ---- Section header ---- */
 .admin-section-header {
   display: flex;

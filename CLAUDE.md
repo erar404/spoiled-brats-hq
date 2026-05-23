@@ -24,13 +24,24 @@ IMAGE=gcr.io/$PROJECT_ID/spoiledbratshq
 docker build \
   --build-arg VITE_SUPABASE_URL=https://nhxozevkhypnfueybufj.supabase.co \
   --build-arg VITE_SUPABASE_ANON_KEY=your-anon-key \
-  --build-arg VITE_EMAILJS_SERVICE_ID=service_xxx \
-  --build-arg VITE_EMAILJS_TEMPLATE_ID=template_xxx \
-  --build-arg VITE_EMAILJS_PUBLIC_KEY=xxx \
   -t $IMAGE .
 
 docker push $IMAGE
 ```
+
+> **Email**: sent via the `send-email` Supabase Edge Function (Google SMTP).
+> SMTP credentials are stored as Supabase secrets — never in the Docker image:
+>
+> ```bash
+> supabase secrets set \
+>   SMTP_HOST=smtp.gmail.com \
+>   SMTP_PORT=587 \
+>   SMTP_USER=you@gmail.com \
+>   SMTP_PASS=your-16-char-app-password \
+>   SMTP_FROM="Kâjon Music <you@gmail.com>"
+> ```
+>
+> Get a Gmail App Password: Google Account → Security → 2-Step Verification → App passwords.
 
 ### Deploy to Cloud Run
 

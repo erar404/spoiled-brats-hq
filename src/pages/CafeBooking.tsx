@@ -12,6 +12,7 @@ import {
   sendOutline, calendarOutline, listOutline, personOutline,
   checkmarkCircleOutline, alertCircleOutline, timeOutline,
   closeCircleOutline, peopleOutline, homeOutline,
+  lockClosedOutline, informationCircleOutline,
 } from 'ionicons/icons'
 import { useHistory } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -50,25 +51,38 @@ export default function CafeBooking() {
   const [calEvents,      setCalEvents]       = useState<EventInput[]>([])
   const [myBookings,     setMyBookings]      = useState<CafeScheduleRow[]>([])
   const [loadingList,    setLoadingList]     = useState(false)
+  const [dateConflict,   setDateConflict]    = useState<{ type: 'exclusive' | 'open'; name: string } | null>(null)
 
   const loadCal = useCallback(async () => {
     const [{ data: bookingData }, { data: blockData }] = await Promise.all([
       supabase
         .from('cafe_schedule')
-        .select('id, event_name, booking_date, status')
+        .select('id, event_name, booking_date, status, is_admin_event, allow_concurrent_bookings')
         .in('status', isAdmin ? ['pending', 'approved'] : ['approved']),
       supabase
         .from('blocked_schedules')
         .select('*')
         .eq('venue', 'cafe'),
     ])
-    const bookingEvents: EventInput[] = (bookingData ?? []).map(row => ({
-      id: `bk-${row.id}`,
-      title: isAdmin ? row.event_name : 'Booked',
-      date: row.booking_date,
-      backgroundColor: STATUS_COLOR[row.status as BookingStatus] ?? '#8a7269',
-      borderColor: 'transparent', textColor: '#ffffff',
-    }))
+    const bookingEvents: EventInput[] = (bookingData ?? []).map(row => {
+      if (row.is_admin_event) {
+        const excl = !row.allow_concurrent_bookings
+        return {
+          id: `bk-${row.id}`,
+          title: (excl ? '🔒 ' : '★ ') + row.event_name,
+          date: row.booking_date,
+          backgroundColor: excl ? '#ba5624' : '#5b8dd9',
+          borderColor: 'transparent', textColor: '#ffffff',
+        }
+      }
+      return {
+        id: `bk-${row.id}`,
+        title: isAdmin ? row.event_name : 'Booked',
+        date: row.booking_date,
+        backgroundColor: STATUS_COLOR[row.status as BookingStatus] ?? '#8a7269',
+        borderColor: 'transparent', textColor: '#ffffff',
+      }
+    })
     const blockedEvents: EventInput[] = ((blockData ?? []) as BlockedScheduleRow[]).map(r => ({
       id: `bl-${r.id}`,
       title: 'ADMIN BLOCKED SCHED',
@@ -93,6 +107,27 @@ export default function CafeBooking() {
 
   useEffect(() => { loadCal(); if (session) loadMine() }, [loadCal, loadMine, session])
 
+  // Real-time check: does the chosen date conflict with an exclusive admin event?
+  useEffect(() => {
+    if (!bookingDate) { setDateConflict(null); return }
+    let cancelled = false
+    supabase
+      .from('cafe_schedule')
+      .select('id, event_name, allow_concurrent_bookings')
+      .eq('booking_date', bookingDate)
+      .eq('is_admin_event', true)
+      .eq('status', 'approved')
+      .then(({ data }) => {
+        if (cancelled) return
+        if (!data || data.length === 0) { setDateConflict(null); return }
+        const excl = data.find(e => !e.allow_concurrent_bookings)
+        setDateConflict(excl
+          ? { type: 'exclusive', name: excl.event_name }
+          : { type: 'open', name: data[0].event_name })
+      })
+    return () => { cancelled = true }
+  }, [bookingDate])
+
   async function handleSubmit() {
     if (!eventName.trim())   return toast('Event name is required.', 'warning')
     if (!bookingDate)         return toast('Booking date is required.', 'warning')
@@ -109,6 +144,18 @@ export default function CafeBooking() {
       toast('Could not verify date availability. Your request will still be reviewed by the admin.', 'warning')
     } else if (blocks && blocks.length > 0) {
       return toast('This date has been blocked by the admin and is unavailable for booking.', 'danger')
+    }
+
+    // Check exclusive admin events
+    const { data: adminEvents } = await supabase
+      .from('cafe_schedule')
+      .select('id, event_name')
+      .eq('booking_date', bookingDate)
+      .eq('is_admin_event', true)
+      .eq('allow_concurrent_bookings', false)
+      .eq('status', 'approved')
+    if (adminEvents && adminEvents.length > 0) {
+      return toast(`This date is reserved for "${adminEvents[0].event_name}" and is not accepting other bookings.`, 'danger')
     }
 
     setSubmitting(true)
@@ -174,6 +221,18 @@ export default function CafeBooking() {
               onIonInput={e => setBookingDate(e.detail.value ?? '')}
               min={today()} className="bk-input" />
           </div>
+
+          {dateConflict && (
+            <div className={`date-conflict-notice date-conflict-notice--${dateConflict.type}`}>
+              <IonIcon icon={dateConflict.type === 'exclusive' ? lockClosedOutline : informationCircleOutline} />
+              <p>
+                {dateConflict.type === 'exclusive'
+                  ? <><strong>"{dateConflict.name}"</strong> is an exclusive event on this date. Booking requests are not available.</>
+                  : <>Note: <strong>"{dateConflict.name}"</strong> is also scheduled on this date. Your request will still be reviewed.</>}
+              </p>
+            </div>
+          )}
+
           <div className="bk-field">
             <IonTextarea label="Booking Details" labelPlacement="stacked" fill="outline"
               value={bookingDetails} onIonInput={e => setBookingDetails(e.detail.value ?? '')}
@@ -233,6 +292,14 @@ export default function CafeBooking() {
               <span className="legend-label">{s.charAt(0).toUpperCase() + s.slice(1)}</span>
             </div>
           ))}
+          <div className="legend-item">
+            <span className="legend-dot" style={{ background: '#5b8dd9' }} />
+            <span className="legend-label">Admin Event</span>
+          </div>
+          <div className="legend-item">
+            <span className="legend-dot" style={{ background: '#ba5624' }} />
+            <span className="legend-label">Exclusive Event</span>
+          </div>
           <div className="legend-item">
             <span className="legend-dot" style={{ background: '#2d1320' }} />
             <span className="legend-label">Admin Blocked</span>

@@ -70,6 +70,8 @@ export interface Database {
           rent_whole_place: boolean
           num_seats: number | null
           status: BookingStatus
+          is_admin_event: boolean
+          allow_concurrent_bookings: boolean
           created_at: string
         }
         Insert: {
@@ -80,6 +82,8 @@ export interface Database {
           rent_whole_place?: boolean
           num_seats?: number | null
           status?: BookingStatus
+          is_admin_event?: boolean
+          allow_concurrent_bookings?: boolean
         }
         Update: {
           user_id?: number | null
@@ -89,6 +93,8 @@ export interface Database {
           rent_whole_place?: boolean
           num_seats?: number | null
           status?: BookingStatus
+          is_admin_event?: boolean
+          allow_concurrent_bookings?: boolean
         }
         Relationships: []
       }
@@ -106,6 +112,7 @@ export interface Database {
           admin_notes: string | null
           payment_proof_url: string | null
           invoice_sent: boolean
+          overnight: boolean
           created_at: string
         }
         Insert: {
@@ -120,6 +127,7 @@ export interface Database {
           admin_notes?: string | null
           payment_proof_url?: string | null
           invoice_sent?: boolean
+          overnight?: boolean
         }
         Update: {
           user_id?: number | null
@@ -133,6 +141,7 @@ export interface Database {
           admin_notes?: string | null
           payment_proof_url?: string | null
           invoice_sent?: boolean
+          overnight?: boolean
         }
         Relationships: []
       }

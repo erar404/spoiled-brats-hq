@@ -14,7 +14,7 @@ import type { EventInput } from '@fullcalendar/core'
 import {
   alertCircleOutline, banOutline, calendarOutline, cashOutline,
   checkmarkCircleOutline, closeCircleOutline, cloudUploadOutline,
-  imageOutline, listOutline, micOutline, musicalNotesOutline,
+  imageOutline, listOutline, micOutline, moonOutline, musicalNotesOutline,
   personOutline, sendOutline, timeOutline,
 } from 'ionicons/icons'
 import { useHistory } from 'react-router-dom'
@@ -70,6 +70,11 @@ function fmtTime(t: string) {
   return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
 }
 function today() { return new Date().toISOString().split('T')[0] }
+function nextDay(date: string): string {
+  const d = new Date(date + 'T00:00:00')
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().split('T')[0]
+}
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -122,14 +127,17 @@ export default function StudioBooking() {
         .select('*')
         .eq('venue', 'studio'),
     ])
-    const sessionEvents: EventInput[] = (sessionData ?? []).map((row: any) => ({
-      id:    `bk-${row.id}`,
-      title: isAdmin ? row.band_artist_name : 'Booked',
-      start: `${row.booking_date}T${row.start_time}`,
-      end:   `${row.booking_date}T${row.end_time}`,
-      backgroundColor: STATUS_COLOR[row.status as StudioBookingStatus] ?? '#8a7269',
-      borderColor: 'transparent', textColor: '#ffffff',
-    }))
+    const sessionEvents: EventInput[] = (sessionData ?? []).map((row: any) => {
+      const endDate = row.overnight ? nextDay(row.booking_date) : row.booking_date
+      return {
+        id:    `bk-${row.id}`,
+        title: isAdmin ? row.band_artist_name : 'Booked',
+        start: `${row.booking_date}T${row.start_time}`,
+        end:   `${endDate}T${row.end_time}`,
+        backgroundColor: STATUS_COLOR[row.status as StudioBookingStatus] ?? '#8a7269',
+        borderColor: 'transparent', textColor: '#ffffff',
+      }
+    })
     const blockedEvents: EventInput[] = ((blockData ?? []) as BlockedScheduleRow[]).map(r => ({
       id:    `bl-${r.id}`,
       title: 'ADMIN BLOCKED SCHED',
@@ -173,24 +181,30 @@ export default function StudioBooking() {
 
   // ── Cost estimator ────────────────────────────────────────────────────────────
 
-  function calcHours(s: string, e: string) {
-    if (!s || !e || s >= e) return 0
+  // When end < start the session crosses midnight — add 24 h to the end minutes.
+  function calcHours(s: string, e: string, isOvernight = false): number {
+    if (!s || !e || s === e) return 0
     const [sh, sm] = s.split(':').map(Number)
     const [eh, em] = e.split(':').map(Number)
-    return ((eh * 60 + em) - (sh * 60 + sm)) / 60
+    const startMins = sh * 60 + sm
+    const endMins   = isOvernight ? 24 * 60 + eh * 60 + em : eh * 60 + em
+    const diff = endMins - startMins
+    return diff > 0 ? diff / 60 : 0
   }
-  const estimatedHours = calcHours(startTime, endTime)
-  const ratePerHour    = bookingType === 'rehearsal' ? rehearsalRate : recordingRate
-  const estimatedCost  = estimatedHours > 0 ? estimatedHours * ratePerHour : 0
+
+  const isOvernight     = !!(startTime && endTime && endTime < startTime)
+  const estimatedHours  = calcHours(startTime, endTime, isOvernight)
+  const ratePerHour     = bookingType === 'rehearsal' ? rehearsalRate : recordingRate
+  const estimatedCost   = estimatedHours > 0 ? estimatedHours * ratePerHour : 0
 
   // ── Submit booking ────────────────────────────────────────────────────────────
 
   async function handleSubmit() {
-    if (!bandName.trim())       return toast('Band / artist name is required.', 'warning')
-    if (!bookingDate)           return toast('Booking date is required.', 'warning')
-    if (!startTime)             return toast('Start time is required.', 'warning')
-    if (!endTime)               return toast('End time is required.', 'warning')
-    if (startTime >= endTime)   return toast('End time must be after start time.', 'warning')
+    if (!bandName.trim()) return toast('Band / artist name is required.', 'warning')
+    if (!bookingDate)     return toast('Booking date is required.', 'warning')
+    if (!startTime)       return toast('Start time is required.', 'warning')
+    if (!endTime)         return toast('End time is required.', 'warning')
+    if (startTime === endTime) return toast('Start and end time cannot be the same.', 'warning')
 
     // Check for admin blocks on this date
     const { data: blocks, error: blockErr } = await supabase
@@ -217,6 +231,7 @@ export default function StudioBooking() {
       start_time:       startTime,
       end_time:         endTime,
       booking_type:     bookingType,
+      overnight:        isOvernight,
       status:           'for_approval',
     })
     setSubmitting(false)
@@ -366,6 +381,12 @@ export default function StudioBooking() {
           <IonItem lines="none" className="studio-hours-note-item">
             <IonNote>Studio hours: Tue–Thu 9am–10pm · Fri–Sat 9am–11pm · Sun 10am–9pm</IonNote>
           </IonItem>
+          {isOvernight && (
+            <div className="studio-overnight-notice">
+              <IonIcon icon={moonOutline} />
+              <span>Overnight session — ends next day at <strong>{fmtTime(endTime)}</strong></span>
+            </div>
+          )}
           {estimatedCost > 0 && (
             <div className="studio-cost-estimate">
               <span className="studio-cost-label">
@@ -445,6 +466,7 @@ export default function StudioBooking() {
                   <p className="my-bk-meta">
                     <IonIcon icon={calendarOutline} />{fmtDate(b.booking_date)}&nbsp;·&nbsp;
                     <IonIcon icon={timeOutline} />{fmtTime(b.start_time)} – {fmtTime(b.end_time)}
+                    {b.overnight && <span className="overnight-tag">+1</span>}
                   </p>
                   {b.admin_price != null && (
                     <p className="my-bk-meta" style={{ color:'var(--color-primary)', fontWeight:600, marginTop:2 }}>

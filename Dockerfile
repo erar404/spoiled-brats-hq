@@ -10,19 +10,14 @@ RUN npm ci --prefer-offline
 # Copy source
 COPY . .
 
-# Vite embeds these at build time — they must be supplied as --build-arg.
-# The anon key is a public client key (safe to bake in); one image per environment.
+# Vite bakes VITE_* env vars into the bundle at build time.
+# Pass them as --build-arg; the anon key is a public client key (safe to bake in).
+# Email is handled server-side via the Supabase Edge Function — no email keys here.
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
-ARG VITE_EMAILJS_SERVICE_ID
-ARG VITE_EMAILJS_TEMPLATE_ID
-ARG VITE_EMAILJS_PUBLIC_KEY
 
 ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
 ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
-ENV VITE_EMAILJS_SERVICE_ID=$VITE_EMAILJS_SERVICE_ID
-ENV VITE_EMAILJS_TEMPLATE_ID=$VITE_EMAILJS_TEMPLATE_ID
-ENV VITE_EMAILJS_PUBLIC_KEY=$VITE_EMAILJS_PUBLIC_KEY
 
 RUN npm run build
 

@@ -2,16 +2,19 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   IonBadge, IonButton, IonChip, IonContent, IonIcon, IonInput,
   IonLabel, IonList, IonItem, IonNote,
-  IonSegment, IonSegmentButton, IonSpinner, IonTextarea,
+  IonSegment, IonSegmentButton, IonSelect, IonSelectOption,
+  IonSpinner, IonTextarea,
 } from '@ionic/react'
 import AppModal from '../components/AppModal'
+import InvoiceTemplate from '../components/InvoiceTemplate'
+import type { InvoiceData } from '../components/InvoiceTemplate'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import type { EventInput } from '@fullcalendar/core'
 import {
-  alertCircleOutline, banOutline, calendarOutline,
+  addCircleOutline, alertCircleOutline, banOutline, calendarOutline,
   cashOutline, checkmarkCircleOutline, closeCircleOutline, closeOutline,
   cloudUploadOutline, imageOutline, mailOutline, micOutline,
   musicalNotesOutline, personOutline, receiptOutline, timeOutline,
@@ -87,9 +90,61 @@ function fmtTime(t: string) {
   return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
 }
 function displayName(b: SessionWithUser) {
-  if (!b.users) return `User #${b.user_id}`
+  if (!b.users) return b.user_id ? `User #${b.user_id}` : 'Admin (manual)'
   const u = b.users
   return [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username
+}
+function today() { return new Date().toISOString().split('T')[0] }
+
+function fmtInvoiceDate(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  })
+}
+
+function nextDay(date: string): string {
+  const d = new Date(date + 'T00:00:00')
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().split('T')[0]
+}
+
+function calcHours(start: string, end: string, overnight = false): number {
+  const [sh, sm] = start.split(':').map(Number)
+  const [eh, em] = end.split(':').map(Number)
+  const startMins = sh * 60 + sm
+  const endMins   = overnight ? 24 * 60 + eh * 60 + em : eh * 60 + em
+  const diff = endMins - startMins
+  return diff > 0 ? diff / 60 : 0
+}
+
+function fmtTimeSlot(start: string, end: string, overnight = false): string {
+  return `${fmtTime(start)} – ${fmtTime(end)}${overnight ? ' (+1)' : ''}`
+}
+
+function buildInvoiceData(b: SessionWithUser): InvoiceData {
+  const year = new Date(b.booking_date + 'T00:00:00').getFullYear()
+  const invoiceNumber = `KJN-${year}${String(b.id).padStart(3, '0')}`
+  const invoiceDate = fmtInvoiceDate(b.booking_date)
+  const hours = calcHours(b.start_time, b.end_time, b.overnight)
+  const amount = b.admin_price ?? 0
+  const rate = hours > 0 ? amount / hours : amount
+  const startHour = parseInt(b.start_time.split(':')[0], 10)
+  const sessionLabel = `${startHour < 12 ? 'AM' : 'PM'} Session (${fmtTime(b.start_time)} – ${fmtTime(b.end_time)})`
+  return {
+    invoiceNumber,
+    invoiceDate,
+    dueDate: invoiceDate,
+    terms: 'Custom',
+    clientName: b.band_artist_name,
+    clientEmail: b.users?.email ?? undefined,
+    items: [{
+      description: b.booking_type === 'recording' ? 'Recording' : 'Rehearsals',
+      subDescription: sessionLabel,
+      hours,
+      rate,
+      amount,
+    }],
+  }
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -105,12 +160,25 @@ export default function AdminStudioBookings() {
   const [selected,  setSelected]  = useState<SessionWithUser | null>(null)
   const [updating,  setUpdating]  = useState(false)
   const [gcash,     setGcash]     = useState<GCashInfo>({ number:'', name:'', qr_url:'' })
+  const [showInvoice, setShowInvoice] = useState(false)
 
   // Edit fields (for_approval review)
   const [editStart, setEditStart] = useState('')
   const [editEnd,   setEditEnd]   = useState('')
   const [editPrice, setEditPrice] = useState('')
   const [editNotes, setEditNotes] = useState('')
+
+  // Add manual booking state
+  const [showAddBooking,  setShowAddBooking]  = useState(false)
+  const [addBandName,     setAddBandName]     = useState('')
+  const [addBookingDate,  setAddBookingDate]  = useState('')
+  const [addStartTime,    setAddStartTime]    = useState('')
+  const [addEndTime,      setAddEndTime]      = useState('')
+  const [addBookingType,  setAddBookingType]  = useState<BookingType>('rehearsal')
+  const [addPrice,        setAddPrice]        = useState('')
+  const [addNotes,        setAddNotes]        = useState('')
+  const [addStatus,       setAddStatus]       = useState<StudioBookingStatus>('approved')
+  const [addingBooking,   setAddingBooking]   = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -125,14 +193,17 @@ export default function AdminStudioBookings() {
     setSessions((sessions ?? []) as SessionWithUser[])
     const sessionEvents: EventInput[] = (sessions ?? [])
       .filter((r: any) => ['for_approval','pending_payment','pending_approval','approved'].includes(r.status))
-      .map((r: any) => ({
-        id:    String(r.id),
-        title: r.band_artist_name,
-        start: `${r.booking_date}T${r.start_time}`,
-        end:   `${r.booking_date}T${r.end_time}`,
-        backgroundColor: STATUS_COLOR[r.status as StudioBookingStatus],
-        borderColor: 'transparent', textColor: '#ffffff',
-      }))
+      .map((r: any) => {
+        const endDate = r.overnight ? nextDay(r.booking_date) : r.booking_date
+        return {
+          id:    String(r.id),
+          title: r.band_artist_name,
+          start: `${r.booking_date}T${r.start_time}`,
+          end:   `${endDate}T${r.end_time}`,
+          backgroundColor: STATUS_COLOR[r.status as StudioBookingStatus],
+          borderColor: 'transparent', textColor: '#ffffff',
+        }
+      })
     const blockedEvents: EventInput[] = ((blockData ?? []) as BlockedScheduleRow[]).map(r => ({
       id:    `bl-${r.id}`,
       title: 'ADMIN BLOCKED SCHED',
@@ -161,15 +232,18 @@ export default function AdminStudioBookings() {
 
   async function approveForPayment() {
     if (!selected) return
-    if (!editStart || !editEnd) return toast('Start and end time required.', 'warning')
-    if (editStart >= editEnd) return toast('End time must be after start time.', 'warning')
+    if (!editStart || !editEnd)               return toast('Start and end time required.', 'warning')
+    if (editStart === editEnd)                return toast('Start and end time cannot be the same.', 'warning')
     if (!editPrice || parseFloat(editPrice) <= 0) return toast('Set a valid price.', 'warning')
+
+    const overnight = editEnd < editStart
 
     setUpdating(true)
     const { error } = await supabase.from('studio_schedule').update({
       status:      'pending_payment',
       start_time:  editStart,
       end_time:    editEnd,
+      overnight,
       admin_price: parseFloat(editPrice),
       admin_notes: editNotes.trim() || null,
     }).eq('id', selected.id)
@@ -259,6 +333,38 @@ export default function AdminStudioBookings() {
     toast(sent ? 'Invoice sent.' : 'Could not send invoice (check EmailJS config).', sent ? 'success' : 'warning')
   }
 
+  async function addManualBooking() {
+    if (!addBandName.trim()) return toast('Band / Artist name is required.', 'warning')
+    if (!addBookingDate)     return toast('Booking date is required.', 'warning')
+    if (!addStartTime) return toast('Start time is required.', 'warning')
+    if (!addEndTime)   return toast('End time is required.', 'warning')
+    if (addStartTime === addEndTime) return toast('Start and end time cannot be the same.', 'warning')
+
+    const overnight = addEndTime < addStartTime
+
+    setAddingBooking(true)
+    const { error } = await supabase.from('studio_schedule').insert({
+      band_artist_name: addBandName.trim(),
+      booking_date:     addBookingDate,
+      start_time:       addStartTime,
+      end_time:         addEndTime,
+      overnight,
+      booking_type:     addBookingType,
+      status:           addStatus,
+      admin_price:      addPrice ? parseFloat(addPrice) : null,
+      admin_notes:      addNotes.trim() || null,
+      user_id:          null,
+      invoice_sent:     false,
+    })
+    setAddingBooking(false)
+    if (error) { toast(error.message, 'danger'); return }
+    toast('Booking added successfully.', 'success')
+    setShowAddBooking(false)
+    setAddBandName(''); setAddBookingDate(''); setAddStartTime(''); setAddEndTime('')
+    setAddBookingType('rehearsal'); setAddPrice(''); setAddNotes(''); setAddStatus('approved')
+    load()
+  }
+
   // Stats
   const counts = Object.keys(STATUS_LABEL).reduce((acc, k) => {
     acc[k as StudioBookingStatus] = sessions.filter(s => s.status === k).length
@@ -273,6 +379,14 @@ export default function AdminStudioBookings() {
   return (
     <>
       {ToastEl}
+
+      {/* Page header */}
+      <div className="admin-bk-page-header">
+        <h3 className="admin-bk-page-title">Studio Bookings</h3>
+        <IonButton size="small" color="primary" onClick={() => setShowAddBooking(true)}>
+          <IonIcon slot="start" icon={addCircleOutline} />Add Booking
+        </IonButton>
+      </div>
 
       {/* Stats */}
       <div className="admin-stats" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
@@ -330,7 +444,7 @@ export default function AdminStudioBookings() {
                   <p className="admin-bk-meta">
                     <IonIcon icon={calendarOutline} />{fmtDate(b.booking_date)}
                     &nbsp;·&nbsp;
-                    <IonIcon icon={timeOutline} />{fmtTime(b.start_time)} – {fmtTime(b.end_time)}
+                    <IonIcon icon={timeOutline} />{fmtTimeSlot(b.start_time, b.end_time, b.overnight)}
                     {b.admin_price && <>&nbsp;·&nbsp;₱{b.admin_price.toLocaleString()}</>}
                     &nbsp;·&nbsp;
                     <IonIcon icon={personOutline} />{displayName(b)}
@@ -381,6 +495,140 @@ export default function AdminStudioBookings() {
       </div>
 
       {/* ── Detail modal ── */}
+      {/* ── Add Manual Booking modal ── */}
+      <AppModal isOpen={showAddBooking} onDidDismiss={() => setShowAddBooking(false)}
+        breakpoints={[0, 0.95]} initialBreakpoint={0.95}>
+        <IonContent>
+          <div className="detail-modal-content">
+            <div className="detail-modal-header">
+              <div>
+                <p className="detail-modal-title">Add Manual Booking</p>
+                <p style={{ fontSize: 13, color: 'var(--color-on-surface-variant)', margin: '2px 0 0' }}>
+                  Create a studio booking directly
+                </p>
+              </div>
+              <IonButton fill="clear" className="detail-modal-close"
+                onClick={() => setShowAddBooking(false)}>
+                <IonIcon slot="icon-only" icon={closeOutline} />
+              </IonButton>
+            </div>
+
+            {/* Session type */}
+            <p className="studio-flow-heading">Session Type</p>
+            <IonSegment value={addBookingType}
+              onIonChange={e => setAddBookingType(e.detail.value as BookingType)}
+              style={{ marginBottom: 16 }}>
+              <IonSegmentButton value="rehearsal">
+                <IonIcon icon={musicalNotesOutline} />
+                <IonLabel>Rehearsal</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton value="recording">
+                <IonIcon icon={micOutline} />
+                <IonLabel>Recording</IonLabel>
+              </IonSegmentButton>
+            </IonSegment>
+
+            <div className="p7-field">
+              <IonInput label="Band / Artist Name *" labelPlacement="stacked" fill="outline"
+                value={addBandName} onIonInput={e => setAddBandName(e.detail.value ?? '')}
+                placeholder="e.g. The Sound Collective" className="p7-input" />
+            </div>
+
+            <div className="p7-field">
+              <IonInput label="Booking Date *" labelPlacement="stacked" fill="outline"
+                type="date" value={addBookingDate}
+                onIonInput={e => setAddBookingDate(e.detail.value ?? '')} className="p7-input" />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div className="p7-field" style={{ marginBottom: 0 }}>
+                <IonInput label="Start Time *" labelPlacement="stacked" fill="outline"
+                  type="time" value={addStartTime}
+                  onIonInput={e => setAddStartTime(e.detail.value ?? '')} className="p7-input" />
+              </div>
+              <div className="p7-field" style={{ marginBottom: 0 }}>
+                <IonInput label="End Time *" labelPlacement="stacked" fill="outline"
+                  type="time" value={addEndTime}
+                  onIonInput={e => setAddEndTime(e.detail.value ?? '')} className="p7-input" />
+              </div>
+            </div>
+
+            <div className="p7-field">
+              <IonInput label="Price (₱)" labelPlacement="stacked" fill="outline"
+                type="number" min="0" step="50" value={addPrice}
+                onIonInput={e => setAddPrice(e.detail.value ?? '')}
+                placeholder="e.g. 1200" className="p7-input" />
+            </div>
+
+            <div className="p7-field">
+              <IonTextarea label="Notes" labelPlacement="stacked" fill="outline"
+                value={addNotes} onIonInput={e => setAddNotes(e.detail.value ?? '')}
+                autoGrow rows={2} className="p7-input"
+                placeholder="Internal notes, special arrangements…" />
+            </div>
+
+            {/* Status selector with color indicator */}
+            <div className="p7-field" style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute', top: 18, right: 40, width: 10, height: 10,
+                borderRadius: '50%', background: STATUS_COLOR[addStatus], zIndex: 2,
+                pointerEvents: 'none',
+              }} />
+              <IonSelect
+                label="Status"
+                labelPlacement="stacked"
+                fill="outline"
+                value={addStatus}
+                onIonChange={e => setAddStatus(e.detail.value as StudioBookingStatus)}
+                className="p7-input"
+                interface="popover">
+                {(Object.keys(STATUS_LABEL) as StudioBookingStatus[]).map(s => (
+                  <IonSelectOption key={s} value={s}>{STATUS_LABEL[s]}</IonSelectOption>
+                ))}
+              </IonSelect>
+            </div>
+
+            <IonItem lines="none" style={{
+              '--background': `${STATUS_COLOR[addStatus]}18`,
+              borderRadius: 'var(--radius)',
+              border: `1px solid ${STATUS_COLOR[addStatus]}44`,
+              marginBottom: 20,
+            }}>
+              <IonNote style={{ fontSize: 13, padding: '8px 0', color: STATUS_COLOR[addStatus] }}>
+                <strong>{STATUS_LABEL[addStatus]}</strong>
+                {addStatus === 'approved' && ' — booking will appear as confirmed on the calendar immediately.'}
+                {addStatus === 'for_approval' && ' — booking will enter the normal approval queue.'}
+                {addStatus === 'pending_payment' && ' — user will be prompted to upload payment proof.'}
+                {addStatus === 'rejected' && ' — booking will be marked as rejected.'}
+                {addStatus === 'cancelled' && ' — booking will be marked as cancelled.'}
+                {addStatus === 'pending_approval' && ' — awaiting admin review of payment proof.'}
+              </IonNote>
+            </IonItem>
+
+            <div className="detail-actions">
+              <IonButton expand="block" color="primary" onClick={addManualBooking} disabled={addingBooking}>
+                {addingBooking
+                  ? <IonSpinner name="crescent" />
+                  : <><IonIcon slot="start" icon={addCircleOutline} />Add Booking</>}
+              </IonButton>
+            </div>
+          </div>
+        </IonContent>
+      </AppModal>
+
+      {/* ── Invoice modal ── */}
+      <AppModal isOpen={showInvoice} onDidDismiss={() => setShowInvoice(false)}
+        className="invoice-modal" breakpoints={[0, 1]} initialBreakpoint={1}>
+        <IonContent>
+          {selected && (
+            <InvoiceTemplate
+              data={buildInvoiceData(selected)}
+              onClose={() => setShowInvoice(false)}
+            />
+          )}
+        </IonContent>
+      </AppModal>
+
       <AppModal isOpen={!!selected} onDidDismiss={() => setSelected(null)}
         breakpoints={[0, 0.6, 0.95]} initialBreakpoint={0.92}>
         <IonContent>
@@ -477,7 +725,7 @@ export default function AdminStudioBookings() {
               <>
                 <div className="detail-row">
                   <span className="detail-key">Time Slot</span>
-                  <p className="detail-val">{fmtTime(selected.start_time)} – {fmtTime(selected.end_time)}</p>
+                  <p className="detail-val">{fmtTimeSlot(selected.start_time, selected.end_time, selected.overnight)}</p>
                 </div>
                 <div className="detail-row">
                   <span className="detail-key">Approved Price</span>
@@ -509,7 +757,7 @@ export default function AdminStudioBookings() {
               <>
                 <div className="detail-row">
                   <span className="detail-key">Time Slot</span>
-                  <p className="detail-val">{fmtTime(selected.start_time)} – {fmtTime(selected.end_time)}</p>
+                  <p className="detail-val">{fmtTimeSlot(selected.start_time, selected.end_time, selected.overnight)}</p>
                 </div>
                 <div className="detail-row">
                   <span className="detail-key">Amount</span>
@@ -547,7 +795,7 @@ export default function AdminStudioBookings() {
               <>
                 <div className="detail-row">
                   <span className="detail-key">Time Slot</span>
-                  <p className="detail-val">{fmtTime(selected.start_time)} – {fmtTime(selected.end_time)}</p>
+                  <p className="detail-val">{fmtTimeSlot(selected.start_time, selected.end_time, selected.overnight)}</p>
                 </div>
                 <div className="detail-row">
                   <span className="detail-key">Amount Paid</span>
@@ -569,6 +817,9 @@ export default function AdminStudioBookings() {
                   <IonButton color="primary" onClick={sendInvoice} disabled={updating || selected.invoice_sent}>
                     {updating ? <IonSpinner name="crescent" /> : <><IonIcon slot="start" icon={selected.invoice_sent ? receiptOutline : mailOutline} />{selected.invoice_sent ? 'Invoice Sent' : 'Send Invoice'}</>}
                   </IonButton>
+                  <IonButton fill="outline" onClick={() => setShowInvoice(true)}>
+                    <IonIcon slot="start" icon={receiptOutline} />View Invoice
+                  </IonButton>
                 </div>
               </>
             )}
@@ -578,7 +829,7 @@ export default function AdminStudioBookings() {
               <>
                 <div className="detail-row">
                   <span className="detail-key">Time Slot</span>
-                  <p className="detail-val">{fmtTime(selected.start_time)} – {fmtTime(selected.end_time)}</p>
+                  <p className="detail-val">{fmtTimeSlot(selected.start_time, selected.end_time, selected.overnight)}</p>
                 </div>
                 <div className="detail-row">
                   <span className="detail-key">Status</span>
