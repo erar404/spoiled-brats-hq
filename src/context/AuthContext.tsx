@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { UserRow } from '../types/database'
@@ -13,6 +13,8 @@ interface AuthContextValue {
   loading: boolean
   justConfirmed: boolean
   clearJustConfirmed: () => void
+  showWelcome: boolean
+  clearWelcome: () => void
   signInWithEmail: (email: string, password: string) => Promise<string | null>
   signInWithGoogle: () => Promise<string | null>
   signInWithPhone: (phone: string) => Promise<string | null>
@@ -28,6 +30,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue>({
   session: null, user: null, profile: null, isAdmin: false, loading: true,
   justConfirmed: false, clearJustConfirmed: () => {},
+  showWelcome: false, clearWelcome: () => {},
   signInWithEmail: async () => null,
   signInWithGoogle: async () => null,
   signInWithPhone: async () => null,
@@ -95,8 +98,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
     return params.get('type') === 'signup' && !!params.get('access_token')
   })
+  // Keep a ref so loadProfile (async, stale closure) can read the current value.
+  const justConfirmedRef = useRef(justConfirmed)
+  useEffect(() => { justConfirmedRef.current = justConfirmed }, [justConfirmed])
 
   function clearJustConfirmed() { setJustConfirmed(false) }
+
+  const [showWelcome, setShowWelcome] = useState(false)
+
+  function clearWelcome() {
+    if (user) localStorage.setItem(`sbhq_welcomed_${user.id}`, '1')
+    setShowWelcome(false)
+  }
 
   // ── Internal helpers ────────────────────────────────────────────────────────
 
@@ -104,7 +117,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const p = await ensureProfile(authUser)
     // Only update with a real profile — never overwrite a valid profile with null
     // from a concurrent call that lost the INSERT race and got an error back.
-    if (p !== null) setProfile(p)
+    if (p !== null) {
+      setProfile(p)
+      // Show the welcome modal once per user on their first login.
+      // Skip for email-confirmation redirects — those already get EmailConfirmedModal.
+      const key = `sbhq_welcomed_${authUser.id}`
+      if (!localStorage.getItem(key) && !justConfirmedRef.current) {
+        setShowWelcome(true)
+      }
+    }
   }
 
   async function refreshProfile() {
@@ -225,6 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAdmin: profile?.role === 'admin',
       loading,
       justConfirmed, clearJustConfirmed,
+      showWelcome, clearWelcome,
       signInWithEmail, signInWithGoogle, signInWithPhone,
       verifyPhoneOtp, signUpWithEmail, signOut, refreshProfile,
     }}>

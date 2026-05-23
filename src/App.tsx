@@ -13,6 +13,7 @@ import AccountPage from './pages/AccountPage'
 import AdminPage from './pages/AdminPage'
 import CafePage from './pages/CafePage'
 import EmailConfirmedModal from './components/EmailConfirmedModal'
+import WelcomeModal from './components/WelcomeModal'
 import HomePage from './pages/HomePage'
 import StudioPage from './pages/StudioPage'
 
@@ -123,6 +124,7 @@ export default function App() {
           <IonReactRouter>
             <AppTabs />
             <EmailConfirmedModal />
+            <WelcomeModal />
           </IonReactRouter>
         </AuthProvider>
       </DarkModeProvider>
