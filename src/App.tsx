@@ -120,13 +120,13 @@ export default function App() {
   return (
     <IonApp>
       <DarkModeProvider>
-        <AuthProvider>
-          <IonReactRouter>
+        <IonReactRouter>
+          <AuthProvider>
             <AppTabs />
             <EmailConfirmedModal />
             <WelcomeModal />
-          </IonReactRouter>
-        </AuthProvider>
+          </AuthProvider>
+        </IonReactRouter>
       </DarkModeProvider>
     </IonApp>
   )

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { UserRow } from '../types/database'
@@ -106,10 +107,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [showWelcome, setShowWelcome] = useState(false)
 
-  function clearWelcome() {
-    if (user) localStorage.setItem(`sbhq_welcomed_${user.id}`, '1')
-    setShowWelcome(false)
-  }
+  function clearWelcome() { setShowWelcome(false) }
+
+  // history is captured in a ref so the auth-state listener (which only runs
+  // once on mount) always sees the current router instance.
+  const history = useHistory()
+  const historyRef = useRef(history)
+  historyRef.current = history
 
   // ── Internal helpers ────────────────────────────────────────────────────────
 
@@ -117,15 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const p = await ensureProfile(authUser)
     // Only update with a real profile — never overwrite a valid profile with null
     // from a concurrent call that lost the INSERT race and got an error back.
-    if (p !== null) {
-      setProfile(p)
-      // Show the welcome modal once per user on their first login.
-      // Skip for email-confirmation redirects — those already get EmailConfirmedModal.
-      const key = `sbhq_welcomed_${authUser.id}`
-      if (!localStorage.getItem(key) && !justConfirmedRef.current) {
-        setShowWelcome(true)
-      }
-    }
+    if (p !== null) setProfile(p)
   }
 
   async function refreshProfile() {
@@ -156,6 +152,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (session?.user) {
         loadProfile(session.user).finally(doneLoading)
+
+        // SIGNED_IN fires only on an actual login action — not on INITIAL_SESSION
+        // (session restore from localStorage) or TOKEN_REFRESHED.  That makes it
+        // the right hook for the post-login welcome + redirect.
+        if (event === 'SIGNED_IN') {
+          // Skip the welcome for email-confirmation redirects — those users
+          // already get the EmailConfirmedModal.
+          if (!justConfirmedRef.current) {
+            setShowWelcome(true)
+          }
+          // Redirect to /home so the user lands on the main page (not the
+          // login screen) regardless of where they signed in from.
+          historyRef.current.replace('/home')
+        }
       } else {
         setProfile(null)
         // On INITIAL_SESSION with no session: if hash tokens are present we
